@@ -1,0 +1,5 @@
+# downloaded *.deb files
+*.deb
+
+# vi
+*.swp
