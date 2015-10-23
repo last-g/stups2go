@@ -3,8 +3,12 @@ SenzaInfo:
   Parameters:
   - Domain:
       Description: Domain to setup for this go-server.
+  - SSLCertificateId:
+      Description: The SSL certificate to use on the load balancer.
   - DockerImage:
       Description: go-server Docker image to use.
+  - AvailabilityZone:
+      Description: The availability zone in which the date EBS is created.
   - InstanceType:
       Description: AWS instance type of your go-server.
 
@@ -12,31 +16,60 @@ SenzaComponents:
 - Configuration:
     Type: Senza::StupsAutoConfiguration
 
-- AppServer:
-    Type: Senza::TaupageAutoScalingGroup
-    InstanceType: '{{Arguments.InstanceType}}'
-    TaupageConfig:
-      runtime: Docker
-      source: '{{Arguments.DockerImage}}'
-      ports:
-        8153: 8153
-      volumes:
-        ebs:
-          /dev/sdf: go-server-volume
-      mounts:
-        /var/lib/go-server:
-          partition: /dev/sdf
-          erase_on_boot: false
-    SecurityGroups:
-    - Fn::GetAtt:
-      - GoServerSecurityGroup
-      - GroupId
-    AutoScaling:
-      Minimum: 1
-      Maximum: 1  # currently, only single master is supported due to shared EBS
-      MetricType: CPU
-
 Resources:
+  GoServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+      - "{{Arguments.AvailabilityZone}}"
+      LaunchConfigurationName:
+        Ref: "GoServerLaunchConfig"
+      MinSize: 1
+      MaxSize: 1
+      LoadBalancerNames:
+      - Ref: "GoServerLoadBalancer"
+      CreationPolicy:
+        ResourceSignal:
+          Timeout: "PT15M"
+          Count: "1"
+
+  GoServerLaunchConfig:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Properties:
+      UserData:
+        "Fn::Base64": "
+runtime: Docker
+source: '{{Arguments.DockerImage}}'
+ports:
+  8153: 8153
+volumes:
+  ebs:
+    /dev/sdf: go-server-volume
+mounts:
+  /var/lib/go-server:
+    partition: /dev/sdf
+    erase_on_boot: false
+"
+      InstanceType: "{{Arguments.InstanceType}}"
+      SecurityGroups:
+      - Ref: "GoServerSecurityGroup"
+      IamInstanceProfile:
+        Ref: "GoServerInstanceProfile"
+
+  GoServerLoadBalancer:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      LoadBalancerName: "GoServerLoadBalancer"
+      AvailabilityZones:
+      - "{{Arguments.AvailabilityZone}}"
+      Listeners:
+      - LoadBalancerPort: "443"
+        InstancePort": "8153"
+        Protocol": "HTTPS"
+        SSLCertificateId: "{{Arguments.SSLCertificateId}}"
+      SecurityGroups:
+      - Ref: "GoLoadBalancerSecurityGroup"
+
   GoLoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -64,8 +97,15 @@ Resources:
         SourceSecurityGroupId:
           Ref: GoLoadBalancerSecurityGroup
 
-  EtcdRole:
-    Type: AWS::IAM::Role
+  GoServerInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: "GoServerRole"
+
+  GoServerRole:
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -76,26 +116,15 @@ Resources:
           Action: sts:AssumeRole
       Path: /
       Policies:
-      - PolicyName: AmazonEC2ReadOnlyAccess
+      - PolicyName: AttachingEBS
         PolicyDocument:
           Version: "2012-10-17"
           Statement:
           - Effect: Allow
-            Action: ec2:Describe*
+            Action: ec2:AttachVolume
+            # TODO find a way to be very specific to the one EBS here
             Resource: "*"
           - Effect: Allow
-            Action: autoscaling:Describe*
+            Action: ec2:DescribeVolumes
             Resource: "*"
-      - PolicyName: AmazonRoute53Access
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - route53:ListHostedZones
-            - route53:ChangeResourceRecordSets
-            - route53:GetHostedZone
-            - route53:ListResourceRecordSets
-            - route53:GetChange
-            Resource: [ "*" ]
 
