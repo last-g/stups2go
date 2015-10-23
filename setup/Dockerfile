@@ -1,3 +1,5 @@
+# registry.opensource.zalan.do/stups/noop
+
 FROM busybox
 MAINTAINER Zalando SE
 
