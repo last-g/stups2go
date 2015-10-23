@@ -1,6 +1,6 @@
 # stups2go
 
-Go Continuous Delivery service based on the STUPS infrastructure.
+[Go Continuous Delivery](http://www.go.cd/) service based on the [STUPS infrastructure](https://stups.io).
 
 WORK IN PROGRESS; ABSOLUTLY NOT FINISHED
 
@@ -36,9 +36,9 @@ docker run --link go-server:go-server-link \
 
 ## TODO
 
-Add OpenIG as authentication layer and provide STUPS compliant default
-configuration. Add own OpenIG-expecting authentication plugin to determine
-username and role from OpenIG auth.
+* Add OpenIG as authentication layer and provide STUPS compliant default
+  configuration. Add own OpenIG-expecting authentication plugin to determine
+  username and role from OpenIG auth.
 
 ## Known Limitations
 
