@@ -11,27 +11,27 @@ No senza template available yet.
 ## Build this repository
 
 ```bash
-./prepare-deps.sh
+$ ./prepare-deps.sh
 
-cd server
-docker build -t go-server .
-cd ..
+$ cd server
+$ docker build -t go-server .
+$ cd ..
 
-cd agent
-docker build -g go-agent .
-cd ..
+$ cd agent
+$ docker build -g go-agent .
+$ cd ..
 ```
 
 Run containers locally for testing:
 
 ```bash
-docker run --name go-server \
-           -p 8153:8153 \
-           -d go-server
+$ docker run --name go-server \
+             -p 8153:8153 \
+             -d go-server
 
-docker run --link go-server:go-server-link \
-           -v /var/run/docker.sock:/var/run/docker.sock \
-           -d go-agent
+$ docker run --link go-server:go-server-link \
+             -v /var/run/docker.sock:/var/run/docker.sock \
+             -d go-agent
 ```
 
 ## TODO
