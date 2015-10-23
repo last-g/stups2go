@@ -27,11 +27,11 @@ Run containers locally for testing:
 ```bash
 docker run --name go-server \
            -p 8153:8153 \
-	   -d go-server
+           -d go-server
 
 docker run --link go-server:go-server-link \
-	   -v /var/run/docker.sock:/var/run/docker.sock \
-	   -d go-agent
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -d go-agent
 ```
 
 ## TODO
