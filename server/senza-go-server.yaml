@@ -1,0 +1,101 @@
+SenzaInfo:
+  StackName: go-server
+  Parameters:
+  - Domain:
+      Description: Domain to setup for this go-server.
+  - DockerImage:
+      Description: go-server Docker image to use.
+  - InstanceType:
+      Description: AWS instance type of your go-server.
+
+SenzaComponents:
+- Configuration:
+    Type: Senza::StupsAutoConfiguration
+
+- AppServer:
+    Type: Senza::TaupageAutoScalingGroup
+    InstanceType: '{{Arguments.InstanceType}}'
+    TaupageConfig:
+      runtime: Docker
+      source: '{{Arguments.DockerImage}}'
+      ports:
+        8153: 8153
+      volumes:
+        ebs:
+          /dev/sdf: go-server-volume
+      mounts:
+        /var/lib/go-server:
+          partition: /dev/sdf
+          erase_on_boot: false
+    SecurityGroups:
+    - Fn::GetAtt:
+      - GoServerSecurityGroup
+      - GroupId
+    AutoScaling:
+      Minimum: 1
+      Maximum: 1  # currently, only single master is supported due to shared EBS
+      MetricType: CPU
+
+Resources:
+  GoLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: go-server load balancer security group
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+
+  GoServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: go-server security group
+      SecurityGroupIngress:
+      # for debugging via piu
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      # HTTP from load balancer
+      - IpProtocol: tcp
+        FromPort: 8153
+        ToPort: 8153
+        SourceSecurityGroupId:
+          Ref: GoLoadBalancerSecurityGroup
+
+  EtcdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: AmazonEC2ReadOnlyAccess
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action: ec2:Describe*
+            Resource: "*"
+          - Effect: Allow
+            Action: autoscaling:Describe*
+            Resource: "*"
+      - PolicyName: AmazonRoute53Access
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - route53:ListHostedZones
+            - route53:ChangeResourceRecordSets
+            - route53:GetHostedZone
+            - route53:ListResourceRecordSets
+            - route53:GetChange
+            Resource: [ "*" ]
+
