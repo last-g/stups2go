@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1445798488993",
+      "Action": [
+        "ec2:AttachVolume",
+        "ec2:DescribeVolumes"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}

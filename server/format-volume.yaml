@@ -1,0 +1,16 @@
+#taupage-ami-config
+
+application_id: noop
+application_version: noop
+
+runtime: Docker
+source: "registry.opensource.zalan.do/stups/noop:1"
+
+volumes:
+  ebs:
+    /dev/sdf: go-server
+mounts:
+  /go-server:
+    partition: /dev/sdf
+    erase_on_boot: true
+
