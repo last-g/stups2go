@@ -54,20 +54,20 @@ Use the resulting "VolumeId" to attach a name tag to the EBS, so your Go
 server is able to find it:
 
     $ aws ec2 create-tags --resources <the previous VolumeId> \
-                          --tags "Key=Name,Value=go-server"
+                          --tags "Key=Name,Value=go-server-volume"
 
 In order to give your servers access to this disk, you need a proper IAM
 instance profile. [This document](server/volume-policy.json) is an example
 policy you can adapt. Create it with the following commands:
 
-    $ aws iam create-role --role-name go-server \
+    $ aws iam create-role --role-name go-server-role \
                           --assume-role-policy-document file://./server/volume-trust.json
-    $ aws iam put-role-policy --role-name go-server \
+    $ aws iam put-role-policy --role-name go-server-role \
                               --policy-name go-server-policy \
                               --policy-document file://./server/volume-policy.json
-    $ aws iam create-instance-profile --instance-profile-name go-server
-    $ aws iam add-role-to-instance-profile --instance-profile-name go-server \
-                                           --role-name go-server
+    $ aws iam create-instance-profile --instance-profile-name go-server-profile
+    $ aws iam add-role-to-instance-profile --instance-profile-name go-server-profile \
+                                           --role-name go-server-role
 
 TODO you can be more strict in your policy document to only allow attaching
 exactly your EBS.
@@ -81,7 +81,7 @@ formatting functionality to bootstrap the disk:
                             --placement "AvailabilityZone=eu-west-1a" \
 			    --instance-type "t2.micro" \
                             --monitoring "Enabled=false" \
-                            --iam-instance-profile "Name=go-server" \
+                            --iam-instance-profile "Name=go-server-profile" \
                             --user-data file://./server/format-volume.yaml
 
 You can now checks in the logs of the server, if your EBS was properly

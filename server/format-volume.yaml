@@ -8,7 +8,7 @@ source: "registry.opensource.zalan.do/stups/noop:1"
 
 volumes:
   ebs:
-    /dev/sdf: go-server
+    /dev/sdf: go-server-volume
 mounts:
   /go-server:
     partition: /dev/xvdf

@@ -47,14 +47,13 @@ volumes:
     /dev/sdf: go-server-volume
 mounts:
   /var/lib/go-server:
-    partition: /dev/sdf
+    partition: /dev/xvdf
     erase_on_boot: false
 "
       InstanceType: "{{Arguments.InstanceType}}"
+      IamInstanceProfile: "go-server-profile"
       SecurityGroups:
       - Ref: "GoServerSecurityGroup"
-      IamInstanceProfile:
-        Ref: "GoServerInstanceProfile"
 
   GoServerLoadBalancer:
     Type: "AWS::ElasticLoadBalancing::LoadBalancer"
@@ -96,35 +95,4 @@ mounts:
         ToPort: 8153
         SourceSecurityGroupId:
           Ref: GoLoadBalancerSecurityGroup
-
-  GoServerInstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    Properties:
-      Path: "/"
-      Roles:
-      - Ref: "GoServerRole"
-
-  GoServerRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service: ec2.amazonaws.com
-          Action: sts:AssumeRole
-      Path: /
-      Policies:
-      - PolicyName: AttachingEBS
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action: ec2:AttachVolume
-            # TODO find a way to be very specific to the one EBS here
-            Resource: "*"
-          - Effect: Allow
-            Action: ec2:DescribeVolumes
-            Resource: "*"
 
