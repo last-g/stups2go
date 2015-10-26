@@ -1,12 +1,12 @@
 SenzaInfo:
   StackName: go-server
   Parameters:
-  - Domain:
+  - DockerImage:
+      Description: go-server Docker image to use.
+  - HostedZone:
       Description: Domain to setup for this go-server.
   - SSLCertificateId:
       Description: The SSL certificate to use on the load balancer.
-  - DockerImage:
-      Description: go-server Docker image to use.
   - AvailabilityZone:
       Description: The availability zone in which the date EBS is created.
   - InstanceType:
@@ -37,7 +37,7 @@ Resources:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Properties:
       UserData:
-        "Fn::Base64": "
+        "Fn::Base64": "#taupage-ami-config
 runtime: Docker
 source: '{{Arguments.DockerImage}}'
 ports:
@@ -95,4 +95,16 @@ mounts:
         ToPort: 8153
         SourceSecurityGroupId:
           Ref: GoLoadBalancerSecurityGroup
+
+  GoServerDomain:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      Name: "delivery.{{Arguments.HostedZone}}."
+      HostedZoneName: "{{Arguments.HostedZone}}."
+      Type: "CNAME"
+      ResourceRecords:
+      - "Fn::GetAtt":
+        - "GoServerLoadBalancer"
+        - "DNSName"
+      TTL: 30
 

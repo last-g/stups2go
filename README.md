@@ -37,10 +37,11 @@ setup regular snappshotting for backups and also use encryption to have your
 data encrypted at rest.
 
 
-### Initializing main EBS
+### General initilisation
 
 The default setup requires the main EBS to exist. With the following steps, you
-can easily set one up as necessary.
+can easily set one up as necessary. Carefully review every command, especially
+if you want to customize your deployment.
 
 With the AWS CLI, you can create the volume itself. The following is a
 reasonable example:
@@ -84,7 +85,7 @@ formatting functionality to bootstrap the disk:
                             --iam-instance-profile "Name=go-server-profile" \
                             --user-data file://./server/format-volume.yaml
 
-You can now checks in the logs of the server, if your EBS was properly
+You can now check in the logs of the server, if your EBS was properly
 formatted. It might take a while until the output is available:
 
     $ aws ec2 get-console-output --instance-id <previous instance ID> | jq -r .Output
@@ -98,7 +99,59 @@ provision your actual Go server and your Go agents.
 
 ### Deploying Go server
 
-No senza template available yet.
+In order to deploy a Go server, you can use the predefined
+[Senza template](server/senza-go-server.yaml). It takes the
+following parameters:
+
+* DockerImage
+  * go-server Docker image to use. It is recommended to use this official
+    Docker image like `registry.opensource.zalan.do/stups/go-server:<latest version>`.
+* HostedZone
+  * The hosted zone name in which to create the Go server's domain. Given a
+    hosted zone name like `myteam.example.org`, the definition will create a
+    domain called `delivery.myteam.example.org` pointing to the Go server's
+    elastic load balancer.
+* SSLCertificateId
+  * The Go server is accessible only via SSL for security reasons. The
+    definition will bootstrap an elastic load balancer using the SSL
+    certificate specified here. The SSL certificate has to cover the above
+    generated delivery domain. To find out your SSL certificate's IDs,
+    execute the following command: `aws iam list-server-certificates`.
+* AvailabilityZone
+  * An EBS volume is always tied to an availability zone. This means, the
+    Go server also has to run in this zone. These settings have to match.
+* InstanceType
+  * With the instance type, you control costs and performance of your running
+    Go server. One possibility might be `c4.large`.
+
+TODO figure out good, recommended sizing for InstanceType
+
+An example deployment might look like that:
+
+```bash
+$ senza create server/senza-go-server.yaml default \
+    registry.opensource.zalan.do/stups/go-server:<latest version> \
+    myteam.example.org \
+    arn:aws:iam::1232342423:server-certificate/myteam-example-org \
+    eu-west-1a \
+    c4.large
+```
+
+This will now spin up the Go server for you with a proper production ready
+setup.
+
+Since this appliance currently only relies on a shared EBS volume, it is not
+possible to run a high availability setup. This means, minor downtimes are
+possible if the hosting server goes down. The deployed auto scaling group will
+automatically spin up a new instance, so downtimes should be minimal like
+a handful minutes.
+
+But this also means that upgrades of the Go server will lead to short
+downtimes. The update procedure itself is simple: First, you destroy the
+running stack via `senza delete server/senza-go-server.yaml default`. Your
+EBS is safe and unused now so you can just spin up a new stack as shown above
+with a newer image. The new server will attach the shared EBS and proceed
+working.
 
 ### Deploying Go agents
 
