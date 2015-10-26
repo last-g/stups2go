@@ -11,6 +11,6 @@ volumes:
     /dev/sdf: go-server
 mounts:
   /go-server:
-    partition: /dev/sdf
+    partition: /dev/xvdf
     erase_on_boot: true
 
