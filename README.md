@@ -130,14 +130,6 @@ $ docker run --link go-server:go-server-link \
              -d go-agent
 ```
 
-## TODO
-
-* Configuration file is probably not in /var/lib/go-server !
-* Add OpenIG as authentication layer and provide STUPS compliant default
-  configuration. Add own OpenIG-expecting authentication plugin to determine
-  username and role from OpenIG auth.
-* http://www.go.cd/documentation/user/current/advanced_usage/agent_auto_register.html
-
 ## Known Limitations
 
 * Database and configuration storage relies solely on AWS EBS. Do snapshots on your own!
