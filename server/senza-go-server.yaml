@@ -7,10 +7,14 @@ SenzaInfo:
       Description: Domain to setup for this go-server.
   - SSLCertificateId:
       Description: The SSL certificate to use on the load balancer.
-  - AvailabilityZone:
-      Description: The availability zone in which the date EBS is created.
+  - PrivateSubnetId:
+      Description: The private subnet ID of the availability zone's matching subnet.
+  - PublicSubnetId:
+      Description: The public subnet ID of the availability zone's matching subnet.
   - InstanceType:
       Description: AWS instance type of your go-server.
+  - ImageId:
+      Description: Latest Taupage AMI ID.
 
 SenzaComponents:
 - Configuration:
@@ -20,56 +24,62 @@ Resources:
   GoServerAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AvailabilityZones:
-      - "{{Arguments.AvailabilityZone}}"
+      VPCZoneIdentifier:
+      - "{{Arguments.PrivateSubnetId}}"
       LaunchConfigurationName:
         Ref: "GoServerLaunchConfig"
       MinSize: 1
       MaxSize: 1
       LoadBalancerNames:
       - Ref: "GoServerLoadBalancer"
-      CreationPolicy:
-        ResourceSignal:
-          Timeout: "PT15M"
-          Count: "1"
 
   GoServerLaunchConfig:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Properties:
       UserData:
-        "Fn::Base64": "#taupage-ami-config
-runtime: Docker
-source: '{{Arguments.DockerImage}}'
-ports:
-  8153: 8153
-volumes:
-  ebs:
-    /dev/sdf: go-server-volume
-mounts:
-  /var/lib/go-server:
-    partition: /dev/xvdf
-    erase_on_boot: false
-"
+        "Fn::Base64":
+          "Fn::Join":
+          - "\n"
+          - - "#taupage-ami-config"
+            - "application_id: go-server"
+            - "application_version: default"
+            - "runtime: Docker"
+            - "source: '{{Arguments.DockerImage}}'"
+            - "root: true"
+            - "ports:"
+            - "  8153: 8153"
+            - "volumes:"
+            - "  ebs:"
+            - "    /dev/sdf: go-server-volume"
+            - "mounts:"
+            - "  /var/lib/go-server:"
+            - "    partition: /dev/xvdf"
+            - "    erase_on_boot: false"
+      ImageId: "{{Arguments.ImageId}}"
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile: "go-server-profile"
       SecurityGroups:
-      - Ref: "GoServerSecurityGroup"
+      - "Fn::GetAtt":
+        - "GoServerSecurityGroup"
+        - "GroupId"
 
   GoServerLoadBalancer:
     Type: "AWS::ElasticLoadBalancing::LoadBalancer"
     Properties:
       LoadBalancerName: "GoServerLoadBalancer"
-      AvailabilityZones:
-      - "{{Arguments.AvailabilityZone}}"
+      Subnets:
+      - "{{Arguments.PublicSubnetId}}"
       Listeners:
       - LoadBalancerPort: "443"
-        InstancePort": "8153"
-        Protocol": "HTTPS"
+        InstancePort: "8153"
+        Protocol: "HTTPS"
         SSLCertificateId: "{{Arguments.SSLCertificateId}}"
       SecurityGroups:
-      - Ref: "GoLoadBalancerSecurityGroup"
+      - "Fn::GetAtt":
+        - "GoServerLBSecurityGroup"
+        - "GroupId"
 
-  GoLoadBalancerSecurityGroup:
+  GoServerLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: go-server load balancer security group
@@ -94,7 +104,9 @@ mounts:
         FromPort: 8153
         ToPort: 8153
         SourceSecurityGroupId:
-          Ref: GoLoadBalancerSecurityGroup
+          "Fn::GetAtt":
+          - "GoServerLBSecurityGroup"
+          - "GroupId"
 
   GoServerDomain:
     Type: "AWS::Route53::RecordSet"

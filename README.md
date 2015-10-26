@@ -106,6 +106,8 @@ following parameters:
 * DockerImage
   * go-server Docker image to use. It is recommended to use this official
     Docker image like `registry.opensource.zalan.do/stups/go-server:<latest version>`.
+    You can check yourself which versions are available
+    [here](https://registry.opensource.zalan.do/teams/stups/artifacts/go-server/tags).
 * HostedZone
   * The hosted zone name in which to create the Go server's domain. Given a
     hosted zone name like `myteam.example.org`, the definition will create a
@@ -117,12 +119,17 @@ following parameters:
     certificate specified here. The SSL certificate has to cover the above
     generated delivery domain. To find out your SSL certificate's IDs,
     execute the following command: `aws iam list-server-certificates`.
-* AvailabilityZone
+* PrivateSubnetId 
   * An EBS volume is always tied to an availability zone. This means, the
-    Go server also has to run in this zone. These settings have to match.
+    Go server also has to run in this zone. This subnet will be the target
+    for your server.
+* PublicSubnetId
+  * The actual subnet to use for the load balancer.
 * InstanceType
   * With the instance type, you control costs and performance of your running
     Go server. One possibility might be `c4.large`.
+* ImageId
+  * A Taupage AMI ID, ideally the most recent one.
 
 TODO figure out good, recommended sizing for InstanceType
 
@@ -133,8 +140,10 @@ $ senza create server/senza-go-server.yaml default \
     registry.opensource.zalan.do/stups/go-server:<latest version> \
     myteam.example.org \
     arn:aws:iam::1232342423:server-certificate/myteam-example-org \
-    eu-west-1a \
-    c4.large
+    subnet-acb987 \
+    subnet-acb231 \
+    c4.large \
+    ami-1234fcb
 ```
 
 This will now spin up the Go server for you with a proper production ready
