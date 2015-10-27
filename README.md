@@ -168,6 +168,14 @@ EBS is safe and unused now so you can just spin up a new stack as shown above
 with a newer image. The new server will attach the shared EBS and proceed
 working.
 
+#### First steps
+
+* Add a new user to the system, matching your username. This new user should
+  be enabled and have administrative permissions by default.
+  * Due to a current bug in the Go server, you have to enable the
+    authentication system by setting the path to your password file to
+    `/dev/zero`
+
 ### Deploying Go agents
 
 No senza template available yet.
