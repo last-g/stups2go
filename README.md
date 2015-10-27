@@ -130,8 +130,9 @@ following parameters:
     `aws ec2 describe-subnets --filters "Name=availabilityZone,Values=eu-west-1a"`.
 * InstanceType
   * With the instance type, you control costs and performance of your running
-    Go server. One possibility might be `c4.large`. TODO figure out good,
-    recommended sizing for InstanceType.
+    Go server.
+    [See Amazon's list of instance types](https://aws.amazon.com/ec2/instance-types/).
+    TODO figure out good, recommended sizing for InstanceType.
 * ImageId
   * A Taupage AMI ID, ideally the most recent one. You can use the following
     command to get a list of Taupage AMIs, the last one should be the most
