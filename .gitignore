@@ -3,3 +3,10 @@
 
 # vi
 *.swp
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Maven
+target
