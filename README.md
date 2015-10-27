@@ -105,14 +105,14 @@ following parameters:
 
 * DockerImage
   * go-server Docker image to use. It is recommended to use this official
-    Docker image like `registry.opensource.zalan.do/stups/go-server:<latest version>`.
-    You can check yourself which versions are available
-    [here](https://registry.opensource.zalan.do/teams/stups/artifacts/go-server/tags).
+    Docker image which you can figure out with this command:
+    `curl -s https://registry.opensource.zalan.do/teams/stups/artifacts/go-server/tags | jq "sort_by(.created)"`
 * HostedZone
   * The hosted zone name in which to create the Go server's domain. Given a
     hosted zone name like `myteam.example.org`, the definition will create a
     domain called `delivery.myteam.example.org` pointing to the Go server's
-    elastic load balancer.
+    elastic load balancer. You can display all configured hosted zones with
+    the following command: `aws route53 list-hosted-zones | jq ".HostedZones[].Name"`
 * SSLCertificateId
   * The Go server is accessible only via SSL for security reasons. The
     definition will bootstrap an elastic load balancer using the SSL
