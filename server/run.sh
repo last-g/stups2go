@@ -21,6 +21,10 @@ echo "DAEMON=N" >> /etc/default/go-server
 # prepare default runtime
 [ ! -f /etc/go/log4j.properties ] && cp /log4j.properties /etc/go/log4j.properties
 
+# enable custom extensions
+mkdir -p /data/plugins/external
+cp /*.jar /data/plugins/external
+
 # ensuring perimssions
 echo "Ensuring correct permissions for Go server..."
 chown -R go /data
