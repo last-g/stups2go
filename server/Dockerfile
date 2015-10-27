@@ -10,15 +10,15 @@ RUN apt-get update && apt-get upgrade -y
 COPY *.deb /
 RUN apt-get install unzip && dpkg -i /*.deb && rm /*.deb
 
-# prepare configuration
-RUN echo "DAEMON=N" >> /etc/default/go-server
-
 # the http port of Go
 EXPOSE 8153
 
-# working dir
-VOLUME /var/lib/go-server
+# the main data storage
+VOLUME /data
 
-# run with predefined user
-USER go
-CMD /usr/share/go-server/server.sh
+# runtime files
+COPY log4j.properties /log4j.properties
+
+# run our bootstrap script
+COPY run.sh /run.sh
+CMD /run.sh

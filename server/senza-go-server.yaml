@@ -52,7 +52,7 @@ Resources:
             - "  ebs:"
             - "    /dev/sdf: go-server-volume"
             - "mounts:"
-            - "  /var/lib/go-server:"
+            - "  /data:"
             - "    partition: /dev/xvdf"
             - "    erase_on_boot: false"
       ImageId: "{{Arguments.ImageId}}"

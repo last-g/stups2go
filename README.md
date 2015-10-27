@@ -178,7 +178,7 @@ No senza template available yet.
 $ ./prepare-deps.sh
 
 $ cd server
-$ docker build -t go-server .
+$ docker build -t registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT .
 $ cd ..
 
 $ cd agent
