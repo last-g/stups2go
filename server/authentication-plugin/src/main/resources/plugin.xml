@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<go-plugin id="stups.authenticator" version="1">
+    <about>
+        <name>STUPS authentication plugin</name>
+        <version>0.1</version>
+        <target-go-version>15.2.0</target-go-version>
+        <description>Plugin to authenticate users in the STUPS infrastructure.</description>
+        <vendor>
+            <name>Zalando SE</name>
+            <url>https://github.com/zalando/stups2go</url>
+        </vendor>
+    </about>
+</go-plugin>
