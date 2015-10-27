@@ -122,16 +122,21 @@ following parameters:
 * PrivateSubnetId 
   * An EBS volume is always tied to an availability zone. This means, the
     Go server also has to run in this zone. This subnet will be the target
-    for your server.
+    for your server. You can list all your subnets with the following command:
+    `aws ec2 describe-subnets --filters "Name=availabilityZone,Values=eu-west-1a"`.
 * PublicSubnetId
-  * The actual subnet to use for the load balancer.
+  * The actual subnet to use for the load balancer. You can list all your
+    subnets with the following command:
+    `aws ec2 describe-subnets --filters "Name=availabilityZone,Values=eu-west-1a"`.
 * InstanceType
   * With the instance type, you control costs and performance of your running
-    Go server. One possibility might be `c4.large`.
+    Go server. One possibility might be `c4.large`. TODO figure out good,
+    recommended sizing for InstanceType.
 * ImageId
-  * A Taupage AMI ID, ideally the most recent one.
-
-TODO figure out good, recommended sizing for InstanceType
+  * A Taupage AMI ID, ideally the most recent one. You can use the following
+    command to get a list of Taupage AMIs, the last one should be the most
+    recent one:
+    `aws ec2 describe-images --filters "Name=name,Values=Taupage*" | jq "[.Images[]|{ImageId: .ImageId, Name: .Name, CreationDate: .CreationDate}]|sort_by(.CreationDate)"`
 
 An example deployment might look like that:
 
