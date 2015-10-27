@@ -14,7 +14,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <go.version>15.2.0</go.version>
-        <main.dir>${project.basedir}</main.dir>
     </properties>
 
     <dependencies>
@@ -24,6 +23,7 @@
             <version>${go.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -34,40 +34,9 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
-        <sourceDirectory>src</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>.</directory>
-                <includes>
-                    <include>plugin.xml</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>resources</directory>
-            </resource>
-        </resources>
-        <testSourceDirectory>test</testSourceDirectory>
-        <testResources>
-            <testResource>
-                <directory>test-resources</directory>
-            </testResource>
-        </testResources>
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
@@ -79,7 +48,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -91,30 +59,6 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>copy-plugin-jars-to-dist</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target name="copy-plugin-jars-to-dist">
-                                <copy todir="${main.dir}/target/go-plugins-dist" flatten="true">
-                                    <fileset dir=".">
-                                        <include name="**/target/*.jar"/>
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -128,7 +72,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}\lib</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
                             <includeScope>runtime</includeScope>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
@@ -136,11 +80,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5</version>
             </plugin>
         </plugins>
     </build>
