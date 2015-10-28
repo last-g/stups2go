@@ -12,6 +12,7 @@ import org.apache.http.client.fluent.Request;
 import org.zalando.stups.tokens.AccessTokens;
 import org.zalando.stups.tokens.Tokens;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -134,11 +135,17 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
 
         // use password credential grant to verify user password
         try {
-            final Map<String,String> clientCredentials = null; // TODO load from $CREDENTIALS_DIR/client.json
+            final File clientCredentialsFile = new File(System.getenv("CREDENTIALS_DIR"), "client.json");
+            final Map<String,String> clientCredentials = (Map<String,String>) JSONUtils.fromJSON(clientCredentialsFile);
             final String basicAuth = clientCredentials.get("client_id") + ":" + clientCredentials.get("client_secret");
+	    final String basicAuthHash = Base64.getEncoder().encodeToString(basicAuth.getBytes());
 
-            return Request.Post(new URI(System.getenv(ENV_ACCESS_TOKEN_URL) + "?realm=/services"))
+	    System.out.println("STUPS DEBUG " + basicAuth + " / " + basicAuthHash);
+	    System.out.println("STUPS DEBUG " + username + " / " + password);
+
+            return Request.Post(new URI(System.getenv(ENV_ACCESS_TOKEN_URL) + "?realm=/employees"))
                     .addHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(basicAuth.getBytes()))
+		    .addHeader("Content-Type", "application/x-www-form-urlencoded")
                     .bodyForm(
                             new NameValuePair() {
                                 @Override
@@ -188,15 +195,18 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
                     .handleResponse(httpResponse -> {
                         final int status = httpResponse.getStatusLine().getStatusCode();
                         if (status != 200) {
+			    System.out.println("STUPS Authentication rejected for " + username + ": (" + status + ") "
+					    + httpResponse.getStatusLine().getReasonPhrase());
                             return renderResponse(SUCCESS_RESPONSE_CODE, null, null);
                         }
                         Map<String, Object> userMap = new HashMap<>();
                         userMap.put("user", getUserJSON(username));
+			System.out.println("STUPS Authenticated user " + username);
                         return renderResponse(SUCCESS_RESPONSE_CODE, null, JSONUtils.toJSON(userMap));
                     });
         } catch (final Exception e) {
             e.printStackTrace();
-            return renderResponse(SUCCESS_RESPONSE_CODE, null, null);
+            return renderResponse(INTERNAL_ERROR_RESPONSE_CODE, null, e.toString());
         }
     }
 

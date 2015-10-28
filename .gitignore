@@ -10,3 +10,8 @@
 
 # Maven
 target
+
+# test credentials
+client.json
+user.json
+test-mint-write

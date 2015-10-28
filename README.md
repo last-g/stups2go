@@ -5,6 +5,21 @@
 
 WORK IN PROGRESS; ABSOLUTLY NOT FINISHED
 
+## Target Audience
+
+You are working with a [STUPS infrastructure](https://stups.io) and you need
+a flexible and powerful continuous delivery tool. You are advanced in operating
+servers and you know how your delivery pipline has to be structured.
+
+This appliance provides a raw, mostly unconfigured
+[Go Continuous Delivery](http://www.go.cd/) setup. This appliance's goal is to
+prepare integration with STUPS infrastructures (like authnz, PierOne support,
+senza deployments, auto scaling). It makes no assumptions how you want to
+structure your delivery pipelines or with which technologies you want to work.
+Continuous delivery pipelines differ greatly for each and every project and
+this is why you get raw administration access to set up everything to your
+needs.
+
 ## Architecture
 
 This appliance will recommend and prepare you for the following architecture.
