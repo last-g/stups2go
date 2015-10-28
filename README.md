@@ -214,13 +214,11 @@ Run containers locally for testing:
 ```bash
 $ docker run --name go-server \
              -p 8153:8153 \
-             -d go-server \
-             registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT
+             -d registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT
 
 $ docker run --link go-server:go-server-link \
              -v /var/run/docker.sock:/var/run/docker.sock \
-             -d go-agent
-             registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT
+             -d registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT
 ```
 
 ## Known Limitations
