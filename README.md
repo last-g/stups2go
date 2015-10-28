@@ -189,7 +189,7 @@ working.
   be enabled and have administrative permissions by default.
   * Due to a current bug in the Go server, you have to enable the
     authentication system by setting the path to your password file to
-    `/dev/zero`
+    `/dev/null`
 
 ### Deploying Go agents
 
@@ -205,7 +205,7 @@ $ docker build -t registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT .
 $ cd ..
 
 $ cd agent
-$ docker build -g go-agent .
+$ docker build -t registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT .
 $ cd ..
 ```
 
@@ -214,11 +214,13 @@ Run containers locally for testing:
 ```bash
 $ docker run --name go-server \
              -p 8153:8153 \
-             -d go-server
+             -d go-server \
+             registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT
 
 $ docker run --link go-server:go-server-link \
              -v /var/run/docker.sock:/var/run/docker.sock \
              -d go-agent
+             registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT
 ```
 
 ## Known Limitations
