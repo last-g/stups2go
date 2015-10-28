@@ -1,6 +1,6 @@
 # registry.opensource.zalan.do/stups/go-agent
 
-FROM zalando/openjdk:8u66-b01-5-1
+FROM zalando/openjdk:8u66-b17-1-1
 MAINTAINER Zalando SE
 
 # keep image updated

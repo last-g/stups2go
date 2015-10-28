@@ -7,16 +7,15 @@ import com.thoughtworks.go.plugin.api.annotation.Extension;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
 import org.zalando.stups.tokens.AccessTokens;
 import org.zalando.stups.tokens.Tokens;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -98,7 +97,7 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
         final List<Map> searchResults = new ArrayList<>();
         final String[] teams = System.getenv(ENV_TEAMS).split(",");
 
-        for (final String team: teams) {
+        for (final String team : teams) {
             // ask team service
             final Map response;
             try {
@@ -129,14 +128,74 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
     }
 
     private GoPluginApiResponse handleAuthenticateUserRequest(GoPluginApiRequest goPluginApiRequest) {
-        Map<String, Object> requestBodyMap = (Map<String, Object>) JSONUtils.fromJSON(goPluginApiRequest.requestBody());
-        String username = (String) requestBodyMap.get("username");
-        String password = (String) requestBodyMap.get("password");
-        if (username.equals("test") && password.equals("test")) {
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("user", getUserJSON("test"));
-            return renderResponse(SUCCESS_RESPONSE_CODE, null, JSONUtils.toJSON(userMap));
-        } else {
+        final Map<String, Object> requestBodyMap = (Map<String, Object>) JSONUtils.fromJSON(goPluginApiRequest.requestBody());
+        final String username = (String) requestBodyMap.get("username");
+        final String password = (String) requestBodyMap.get("password");
+
+        // use password credential grant to verify user password
+        try {
+            final Map<String,String> clientCredentials = null; // TODO load from $CREDENTIALS_DIR/client.json
+            final String basicAuth = clientCredentials.get("client_id") + ":" + clientCredentials.get("client_secret");
+
+            return Request.Post(new URI(System.getenv(ENV_ACCESS_TOKEN_URL) + "?realm=/services"))
+                    .addHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(basicAuth.getBytes()))
+                    .bodyForm(
+                            new NameValuePair() {
+                                @Override
+                                public String getName() {
+                                    return "grant_type";
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return "password";
+                                }
+                            },
+                            new NameValuePair() {
+                                @Override
+                                public String getName() {
+                                    return "username";
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return username;
+                                }
+                            },
+                            new NameValuePair() {
+                                @Override
+                                public String getName() {
+                                    return "password";
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return password;
+                                }
+                            },
+                            new NameValuePair() {
+                                @Override
+                                public String getName() {
+                                    return "scope";
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return "uid";
+                                }
+                            })
+                    .execute()
+                    .handleResponse(httpResponse -> {
+                        final int status = httpResponse.getStatusLine().getStatusCode();
+                        if (status != 200) {
+                            return renderResponse(SUCCESS_RESPONSE_CODE, null, null);
+                        }
+                        Map<String, Object> userMap = new HashMap<>();
+                        userMap.put("user", getUserJSON(username));
+                        return renderResponse(SUCCESS_RESPONSE_CODE, null, JSONUtils.toJSON(userMap));
+                    });
+        } catch (final Exception e) {
+            e.printStackTrace();
             return renderResponse(SUCCESS_RESPONSE_CODE, null, null);
         }
     }
@@ -146,7 +205,6 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
         userMap.put("username", username);
         return userMap;
     }
-
 
     private GoPluginApiResponse renderResponse(final int responseCode, final Map<String, String> responseHeaders, final String responseBody) {
         return new GoPluginApiResponse() {
