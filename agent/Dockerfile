@@ -15,8 +15,8 @@ RUN apt-get install -y git python3-setuptools docker.io
 RUN easy_install3 pip && pip install stups-senza
 
 # prepare configuration
-RUN echo "GO_SERVER=\${CONFIG_GO_SERVER}" >> /etc/default/go-agent
-RUN echo "GO_SERVER_PORT=\${CONFIG_GO_SERVER_PORT}" >> /etc/default/go-agent
+RUN echo "GO_SERVER=\${STUPS_GO_SERVER_DOMAIN}" >> /etc/default/go-agent
+RUN echo "GO_SERVER_PORT=9153" >> /etc/default/go-agent
 RUN echo "DAEMON=N" >> /etc/default/go-agent
 
 # working dir

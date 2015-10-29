@@ -16,7 +16,11 @@ ln -s /data /var/lib/go-server
 # prepare configuration
 echo "Preparing configuration..."
 mkdir -p /data/config
-echo "DAEMON=N" >> /etc/default/go-server
+echo "export DAEMON=N" >> /etc/default/go-server
+echo "export GO_SERVER_PORT=9153" >> /etc/default/go-server
+echo "export GO_SERVER_SSL_PORT=9154" >> /etc/default/go-server
+echo "export SERVER_MEM=\$(java-dynamic-memory-opts)" >> /etc/default/go-server
+echo "export SERVER_MAX_MEM=\$(java-dynamic-memory-opts)" >> /etc/default/go-server
 
 # prepare default runtime
 [ ! -f /etc/go/log4j.properties ] && cp /log4j.properties /etc/go/log4j.properties

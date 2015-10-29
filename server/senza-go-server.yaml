@@ -67,7 +67,7 @@ Resources:
             - "root: true"
             - "mint_bucket: {{Arguments.MintBucket}}"
             - "ports:"
-            - "  8153: 8153"
+            - "  9153: 9153"
             - "volumes:"
             - "  ebs:"
             - "    /dev/sdf: go-server-volume"
@@ -99,7 +99,14 @@ Resources:
       - "{{Arguments.PublicSubnetId}}"
       Listeners:
       - LoadBalancerPort: "443"
-        InstancePort: "8153"
+        InstancePort: "9153"
+        Protocol: "HTTPS"
+        SSLCertificateId: "{{Arguments.SSLCertificateId}}"
+      - LoadBalancerPort: "9153"
+        InstancePort: "9153"
+        Protocol: "HTTP"
+      - LoadBalancerPort: "9154"
+        InstancePort: "9153"
         Protocol: "HTTPS"
         SSLCertificateId: "{{Arguments.SSLCertificateId}}"
       SecurityGroups:
@@ -116,6 +123,10 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 9153
+        ToPort: 9154
+        CidrIp: 0.0.0.0/0
 
   GoServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -129,8 +140,8 @@ Resources:
         CidrIp: 0.0.0.0/0
       # HTTP from load balancer
       - IpProtocol: tcp
-        FromPort: 8153
-        ToPort: 8153
+        FromPort: 9153
+        ToPort: 9153
         SourceSecurityGroupId:
           "Fn::GetAtt":
           - "GoServerLBSecurityGroup"

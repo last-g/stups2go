@@ -173,7 +173,7 @@ following parameters:
 An example deployment might look like that:
 
 ```bash
-$ senza create server/senza-go-server.yaml go-server \
+$ senza create server/senza-go-server.yaml server \
     DockerImage=registry.opensource.zalan.do/stups/go-server:<latest version> \
     HostedZone=myteam.example.org \
     SSLCertificateId=arn:aws:iam::1232342423:server-certificate/myteam-example-org \
@@ -229,12 +229,15 @@ working.
 The go-agent templates take similar arguments as the go-server. The extra
 arguments are those:
 
-* GoServerUrl
-  * The URL where you find your Go server e.g. `https://delivery.example.org`.
-* GoServerRegistrationKey
+* GoServerDomain
+  * The domain where you find your Go server e.g. `delivery.example.org`.
+* GoAgentRegistrationKey
   * The preshared registration key for Go agents to automatically register
     with your Go server.
-* AgentCount
+* GoAgentEnvironments
+  * The environment to announce to the Go server. As an example, this could
+    be `test` or `prod`.
+* GoAgentCount
   * Your agents will run in an auto scaling group but currently there is no
     metric to truly automatically scale. You can manage the count of agents
     dynamically with your ASG.
@@ -284,16 +287,42 @@ without accidentially affecting your production systems. Make sure you switched
 your account to your test account with `mai login ...`.
 
 At first, you need to open your mint bucket to your test account, in order to
-be able to upload Docker images later on.
+be able to upload Docker images later on. Read about cross-account access
+[on this page](http://docs.aws.amazon.com/AmazonS3/latest/dev/example-walkthroughs-managing-access-example2.html).
+The policy to attach to your bucket should look look similar to that:
 
-TODO more documentation
+```json
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Sid": "GoAgentCredentialsAccess",
+         "Effect": "Allow",
+         "Principal": {
+            "AWS": "arn:aws:iam::<your-test-account-id>:root"
+         },
+         "Action": [
+            "s3:GetObject",
+            "s3:ListBucket"
+         ],
+         "Resource": [
+            "arn:aws:s3:::<your-mint-bucket-name>",
+            "arn:aws:s3:::<your-mint-bucket-name>/<your-application-id>/*"
+         ]
+      }
+   ]
+}
+```
+
+Now you can bootstrap your agents like that:
 
 ```bash
-$ senza create agent/senza-go-agent-builder.yaml go-agent-builder \
+$ senza create agent/senza-go-agent.yaml agent \
     DockerImage=<your custom agent image> \
-    GoServerUrl=https://delivery.example.org \
-    GoServerRegistrationKey=<your generated preshared key> \
-    AgentCount=10 \
+    GoServerDomain=delivery.example.org \
+    GoAgentRegistrationKey=<your generated preshared key> \
+    GoAgentEnvironments=test \
+    GoAgentCount=10 \
     PrivateSubnetId=subnet-acb987 \
     InstanceType=m3.medium \
     ImageId=ami-1234fcb \
