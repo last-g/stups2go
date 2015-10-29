@@ -76,14 +76,14 @@ In order to give your servers access to this disk, you need a proper IAM
 instance profile. [This document](server/volume-policy.json) is an example
 policy you can adapt. Create it with the following commands:
 
-    $ aws iam create-role --role-name go-server-role \
+    $ aws iam create-role --role-name go-server-ebs-role \
                           --assume-role-policy-document file://./server/volume-trust.json
-    $ aws iam put-role-policy --role-name go-server-role \
-                              --policy-name go-server-policy \
+    $ aws iam put-role-policy --role-name go-server-ebs-role \
+                              --policy-name go-server-ebs-policy \
                               --policy-document file://./server/volume-policy.json
-    $ aws iam create-instance-profile --instance-profile-name go-server-profile
-    $ aws iam add-role-to-instance-profile --instance-profile-name go-server-profile \
-                                           --role-name go-server-role
+    $ aws iam create-instance-profile --instance-profile-name go-server-ebs-profile
+    $ aws iam add-role-to-instance-profile --instance-profile-name go-server-ebs-profile \
+                                           --role-name go-server-ebs-role
 
 TODO you can be more strict in your policy document to only allow attaching
 exactly your EBS.
@@ -95,9 +95,9 @@ formatting functionality to bootstrap the disk:
     $ aws ec2 run-instances --image-id <a recent Taupage image> \
                             --subnet-id <a subnet ID in your chosen AZ> \
                             --placement "AvailabilityZone=eu-west-1a" \
-			    --instance-type "t2.micro" \
+                            --instance-type "t2.micro" \
                             --monitoring "Enabled=false" \
-                            --iam-instance-profile "Name=go-server-profile" \
+                            --iam-instance-profile "Name=go-server-ebs-profile" \
                             --user-data file://./server/format-volume.yaml
 
 You can now check in the logs of the server, if your EBS was properly
@@ -216,6 +216,10 @@ working.
   how to properly configure your server. This appliance did not do any
   configurations for you. Add the users that need access, configure roles,
   assign them, configure pipelines etc.
+* If you need additional plugins in your Go server, you have to create a new
+  Docker image based on the general one. You can then just copy all necessary
+  plugins to `/` like `/foobar-plugin.jar` and those will automatically be
+  picked up on boot.
 
 ### Deploying Go agents
 

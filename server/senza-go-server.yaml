@@ -25,6 +25,15 @@ SenzaInfo:
       Description: ID of the registered application to use for robot access.
   - MintBucket:
       Description: Name of the application's mint bucket.
+  - ScalyrKey:
+      Description: Optional key for scalyr logging.
+      Default: ""
+  - LogentriesKey:
+      Description: Optional key for logentries logging.
+      Default: ""
+  - AppdynamicsApplication:
+      Description: Optional AppDynamics application name.
+      Default: ""
 
 SenzaComponents:
 - Configuration:
@@ -56,6 +65,7 @@ Resources:
             - "runtime: Docker"
             - "source: '{{Arguments.DockerImage}}'"
             - "root: true"
+            - "mint_bucket: {{Arguments.MintBucket}}"
             - "ports:"
             - "  8153: 8153"
             - "volumes:"
@@ -65,13 +75,17 @@ Resources:
             - "  /data:"
             - "    partition: /dev/xvdf"
             - "    erase_on_boot: false"
+            - "{{#Arguments.ScalyrKey}}scalyr_account_key: '{{Arguments.ScalyrKey}}'{{/Arguments.ScalyrKey}}"
+            - "{{#Arguments.LogentriesKey}}logentries_account_key: '{{Arguments.LogentriesKey}}'{{/Arguments.LogentriesKey}}"
+            - "{{#Arguments.AppdynamicsApplication}}appdynamics_application: '{{Arguments.AppdynamicsAplication}}'{{/Arguments.AppdynamicsApplication}}"
             - "environment:"
-            - "  STUPS_ACCESS_TOKEN_URL={{Arguments.AccessTokenUrl}}"
-            - "  STUPS_TEAM_SERVICE_URL={{Arguments.TeamServiceUrl}}"
-            - "  STUPS_TEAMS={{Arguments.Teams}}"
+            - "  STUPS_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}'"
+            - "  STUPS_TEAM_SERVICE_URL: '{{Arguments.TeamServiceUrl}}'"
+            - "  STUPS_TEAMS: '{{Arguments.Teams}}'"
       ImageId: "{{Arguments.ImageId}}"
       InstanceType: "{{Arguments.InstanceType}}"
-      IamInstanceProfile: "go-server-profile"
+      IamInstanceProfile:
+        Ref: GoServerProfile
       SecurityGroups:
       - "Fn::GetAtt":
         - "GoServerSecurityGroup"
@@ -134,3 +148,44 @@ Resources:
         - "DNSName"
       TTL: 30
 
+  GoServerProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Roles:
+      - Ref: GoServerRole
+
+  GoServerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - "sts:AssumeRole"
+      Policies:
+      - PolicyName: GoServerAllowEBSAttach
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Sid: "AllowEBSAttach"
+            Action:
+            - "ec2:AttachVolume"
+            - "ec2:DescribeVolumes"
+            Effect: Allow
+            Resource: "*"  # TODO make access less broad
+      - PolicyName: GoServerAllowMintRead
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Sid: "AllowMintRead"
+            Action:
+            - "s3:GetObject"
+            - "s3:ListBucket"
+            Effect: Allow
+            Resource:
+            - "arn:aws:s3:::{{Arguments.MintBucket}}"
+            - "arn:aws:s3:::{{Arguments.MintBucket}}/{{Arguments.ApplicationId}}/*"
