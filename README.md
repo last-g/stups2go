@@ -173,7 +173,7 @@ following parameters:
 An example deployment might look like that:
 
 ```bash
-$ senza create server/senza-go-server.yaml default \
+$ senza create server/senza-go-server.yaml go-server \
     DockerImage=registry.opensource.zalan.do/stups/go-server:<latest version> \
     HostedZone=myteam.example.org \
     SSLCertificateId=arn:aws:iam::1232342423:server-certificate/myteam-example-org \
@@ -184,7 +184,7 @@ $ senza create server/senza-go-server.yaml default \
     AccessTokenUrl=https://example.org/oauth2/access_token \
     TeamServiceUrl=https://teams.example.org \
     Teams=myteam,mypartnerteam \
-    ApplicationId=my-go-server \
+    ApplicationId=my-go-appliance \
     MintBucket=my-stups-mint-bucket-name
 ```
 
@@ -212,6 +212,9 @@ working.
   * Due to a current bug in the Go server, you have to enable the
     authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png)
     to `/dev/null`.
+* [Setup auto registration](http://www.go.cd/documentation/user/current/advanced_usage/agent_auto_register.html)
+  in your Go server for Go agents and save your key. Note to generate a good
+  random key!
 * [Read through the whole Go documentation](http://www.go.cd/documentation/user/current/configuration/index.html)
   how to properly configure your server. This appliance did not do any
   configurations for you. Add the users that need access, configure roles,
@@ -223,7 +226,88 @@ working.
 
 ### Deploying Go agents
 
-No senza template available yet.
+The go-agent templates take similar arguments as the go-server. The extra
+arguments are those:
+
+* GoServerUrl
+  * The URL where you find your Go server e.g. `https://delivery.example.org`.
+* GoServerRegistrationKey
+  * The preshared registration key for Go agents to automatically register
+    with your Go server.
+* AgentCount
+  * Your agents will run in an auto scaling group but currently there is no
+    metric to truly automatically scale. You can manage the count of agents
+    dynamically with your ASG.
+
+#### Customize your Go agent
+
+It is not forseeable whatever technology you use, so this appliance expects
+you to build your own agent based on the one provided here. An example
+Dockerfile could be build like that for a typical Java environment:
+
+```
+FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
+RUN apt-get install -y maven npm
+```
+
+A typical Clojure environment could look like that:
+
+```
+FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
+RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
+        && chmod +x /usr/local/bin/lein \
+        && su - go -c "lein --version"
+```
+
+And obviously you can combine whatever you need at your builds like that:
+
+```
+FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
+
+# install whatever you need like Apache Maven or NPM with NodeJS
+RUN apt-get install -y maven npm
+
+# and in addition also Leiningen for compiling Clojure
+RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
+        && chmod +x /usr/local/bin/lein \
+        && su - go -c "lein --version"
+```
+
+Note that Docker and the STUPS tooling is preinstalled on the default agent.
+
+#### Builder agents
+
+Builder agents are meant to be deployed in a non-production AWS account. Those
+should do the main work like compiling, testing and packaging your artifacts.
+They can also do big integration tests with the resources of the test account
+without accidentially affecting your production systems. Make sure you switched
+your account to your test account with `mai login ...`.
+
+At first, you need to open your mint bucket to your test account, in order to
+be able to upload Docker images later on.
+
+TODO more documentation
+
+```bash
+$ senza create agent/senza-go-agent-builder.yaml go-agent-builder \
+    DockerImage=<your custom agent image> \
+    GoServerUrl=https://delivery.example.org \
+    GoServerRegistrationKey=<your generated preshared key> \
+    AgentCount=10 \
+    PrivateSubnetId=subnet-acb987 \
+    InstanceType=m3.medium \
+    ImageId=ami-1234fcb \
+    ApplicationId=my-go-appliance \
+    MintBucket=my-stups-mint-bucket-name
+```
+
+#### Deployer agents
+
+Deployer agents have access to your production system and should mainly focus
+on all your deployment steps. They will have permission to actually deploy
+and tear down your production servers.
+
+TODO define senza template
 
 ## Build this repository
 

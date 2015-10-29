@@ -1,0 +1,104 @@
+SenzaInfo:
+  StackName: go-agent-builder
+  Parameters:
+  - DockerImage:
+      Description: go-agent Docker image to use.
+  - GoServerUrl:
+      Description: go-server https endpoint.
+  - GoServerRegistrationKey:
+      Description: go-server key for auto registration for agents.
+  - AgentCount:
+      Description: Count of go-agent's to run in parallel.
+  - PrivateSubnetId:
+      Description: The private subnet ID of the availability zone's matching subnet.
+  - InstanceType:
+      Description: AWS instance type of your go-server.
+  - ImageId:
+      Description: Latest Taupage AMI ID.
+  - ApplicationId:
+      Description: ID of the registered application to use for robot access.
+  - MintBucket:
+      Description: Name of the application's mint bucket.
+  - ScalyrKey:
+      Description: Optional key for scalyr logging.
+      Default: ""
+  - LogentriesKey:
+      Description: Optional key for logentries logging.
+      Default: ""
+  - AppdynamicsApplication:
+      Description: Optional AppDynamics application name.
+      Default: ""
+
+SenzaComponents:
+- Configuration:
+    Type: Senza::StupsAutoConfiguration
+
+Resources:
+  GoAgentAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+      - "{{Arguments.PrivateSubnetId}}"
+      LaunchConfigurationName:
+        Ref: "GoAgentLaunchConfig"
+      MinSize: 1
+      DesiredCapacity: "{{Arguments.AgentCount}}"
+      MaxSize: "{{Arguments.AgentCount}}"
+
+  GoAgentLaunchConfig:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Properties:
+      UserData:
+        "Fn::Base64":
+          "Fn::Join":
+          - "\n"
+          - - "#taupage-ami-config"
+            - "application_id: {{Arguments.ApplicationId}}"
+            - "application_version: {{SenzaInfo.StackVersion}}"
+            - "runtime: Docker"
+            - "source: '{{Arguments.DockerImage}}'"
+            - "root: true"
+            - "mint_bucket: {{Arguments.MintBucket}}"
+            - "{{#Arguments.ScalyrKey}}scalyr_account_key: '{{Arguments.ScalyrKey}}'{{/Arguments.ScalyrKey}}"
+            - "{{#Arguments.LogentriesKey}}logentries_account_key: '{{Arguments.LogentriesKey}}'{{/Arguments.LogentriesKey}}"
+            - "{{#Arguments.AppdynamicsApplication}}appdynamics_application: '{{Arguments.AppdynamicsAplication}}'{{/Arguments.AppdynamicsApplication}}"
+            - "environment:"
+            - "  STUPS_GO_SERVER_URL: '{{Arguments.GoServerUrl}}'"
+            - "  STUPS_GO_SERVER_REGISTRATION_KEY: '{{Arguments.GoServerRegistrationKey}}'"
+            - "  STUPS_GO_SERVER_ENVIRONMENTS: 'test'"
+      ImageId: "{{Arguments.ImageId}}"
+      InstanceType: "{{Arguments.InstanceType}}"
+      IamInstanceProfile:
+        Ref: GoAgentProfile
+
+  GoAgentProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Roles:
+      - Ref: GoAgentRole
+
+  GoAgentRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - "sts:AssumeRole"
+      Policies:
+      - PolicyName: GoAgentAllowMintRead
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Sid: "AllowMintRead"
+            Action:
+            - "s3:GetObject"
+            - "s3:ListBucket"
+            Effect: Allow
+            Resource:
+            - "arn:aws:s3:::{{Arguments.MintBucket}}"
+            - "arn:aws:s3:::{{Arguments.MintBucket}}/{{Arguments.ApplicationId}}/*"
