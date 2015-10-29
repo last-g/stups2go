@@ -15,6 +15,16 @@ SenzaInfo:
       Description: AWS instance type of your go-server.
   - ImageId:
       Description: Latest Taupage AMI ID.
+  - AccessTokenUrl:
+      Description: URL of your OAuth2 access_token endpoint.
+  - TeamServiceUrl:
+      Description: URL to your team service endpoint.
+  - Teams:
+      Description: Comma separated list of teams to find in the user search.
+  - ApplicationId:
+      Description: ID of the registered application to use for robot access.
+  - MintBucket:
+      Description: Name of the application's mint bucket.
 
 SenzaComponents:
 - Configuration:
@@ -41,8 +51,8 @@ Resources:
           "Fn::Join":
           - "\n"
           - - "#taupage-ami-config"
-            - "application_id: go-server"
-            - "application_version: default"
+            - "application_id: {{Arguments.ApplicationId}}"
+            - "application_version: {{SenzaInfo.StackVersion}}"
             - "runtime: Docker"
             - "source: '{{Arguments.DockerImage}}'"
             - "root: true"
@@ -55,6 +65,10 @@ Resources:
             - "  /data:"
             - "    partition: /dev/xvdf"
             - "    erase_on_boot: false"
+            - "environment:"
+            - "  STUPS_ACCESS_TOKEN_URL={{Arguments.AccessTokenUrl}}"
+            - "  STUPS_TEAM_SERVICE_URL={{Arguments.TeamServiceUrl}}"
+            - "  STUPS_TEAMS={{Arguments.Teams}}"
       ImageId: "{{Arguments.ImageId}}"
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile: "go-server-profile"

@@ -114,6 +114,11 @@ provision your actual Go server and your Go agents.
 
 ### Deploying Go server
 
+In order to integrate properly with your OAuth2 environment, you need to
+register this deployment as an application in Kio. Go to YourTurn, register
+the app, setup your mint bucket and assign your app the `application.read`
+and `application.write` permission.
+
 In order to deploy a Go server, you can use the predefined
 [Senza template](server/senza-go-server.yaml). It takes the
 following parameters:
@@ -153,18 +158,34 @@ following parameters:
     command to get a list of Taupage AMIs, the last one should be the most
     recent one:
     `aws ec2 describe-images --filters "Name=name,Values=Taupage*" | jq "[.Images[]|{ImageId: .ImageId, Name: .Name, CreationDate: .CreationDate}]|sort_by(.CreationDate)"`
+* AccessTokenUrl
+  * The "access token" endpoint of your OAuth2 provider. Something similar to
+    `https://example.org/oauth2/access_token`.
+* TeamServiceUrl
+  * The URL of your deployed team service.
+* Teams
+  * Comma separated list of teams that should be included in your user search.
+* ApplicationId
+  * The application id of your registered Kio application.
+* MintBucket
+  * Your mint bucket, where your application credentials are synced to.
 
 An example deployment might look like that:
 
 ```bash
 $ senza create server/senza-go-server.yaml default \
-    registry.opensource.zalan.do/stups/go-server:<latest version> \
-    myteam.example.org \
-    arn:aws:iam::1232342423:server-certificate/myteam-example-org \
-    subnet-acb987 \
-    subnet-acb231 \
-    c4.large \
-    ami-1234fcb
+    DockerImage=registry.opensource.zalan.do/stups/go-server:<latest version> \
+    HostedZone=myteam.example.org \
+    SSLCertificateId=arn:aws:iam::1232342423:server-certificate/myteam-example-org \
+    PrivateSubnetId=subnet-acb987 \
+    PublicSubnetId=subnet-acb231 \
+    InstanceType=c4.large \
+    ImageId=ami-1234fcb \
+    AccessTokenUrl=https://example.org/oauth2/access_token \
+    TeamServiceUrl=https://teams.example.org \
+    Teams=myteam,mypartnerteam \
+    ApplicationId=my-go-server \
+    MintBucket=my-stups-mint-bucket-name
 ```
 
 This will now spin up the Go server for you with a proper production ready
@@ -185,11 +206,16 @@ working.
 
 #### First steps
 
-* Add a new user to the system, matching your username. This new user should
-  be enabled and have administrative permissions by default.
+* [Add a new user](http://www.go.cd/documentation/user/current/configuration/managing_users.html)
+  to the system, matching your username. This new user should be enabled and
+  have administrative permissions by default.
   * Due to a current bug in the Go server, you have to enable the
-    authentication system by setting the path to your password file to
-    `/dev/null`
+    authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png)
+    to `/dev/null`.
+* [Read through the whole Go documentation](http://www.go.cd/documentation/user/current/configuration/index.html)
+  how to properly configure your server. This appliance did not do any
+  configurations for you. Add the users that need access, configure roles,
+  assign them, configure pipelines etc.
 
 ### Deploying Go agents
 

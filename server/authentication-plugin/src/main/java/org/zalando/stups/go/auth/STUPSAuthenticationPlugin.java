@@ -4,16 +4,16 @@ import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPlugin;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.plugin.api.annotation.Extension;
-import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.stups.tokens.AccessTokens;
 import org.zalando.stups.tokens.Tokens;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -22,7 +22,7 @@ import static java.util.Arrays.asList;
 
 @Extension
 public class STUPSAuthenticationPlugin implements GoPlugin {
-    private static final Logger LOGGER = Logger.getLoggerFor(STUPSAuthenticationPlugin.class);
+    private static final Logger LOG = LoggerFactory.getLogger(STUPSAuthenticationPlugin.class);
 
     public static final String PLUGIN_ID = "stups.authenticator";
     public static final String EXTENSION_NAME = "authentication";
@@ -41,19 +41,18 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
 
     private static final String TOKEN_SERVICE = "service";
 
-    private AccessTokens tokens;
+    private static AccessTokens tokens;
 
     @Override
     public GoPluginIdentifier pluginIdentifier() {
-        System.out.println("STUPS Announcing plugin base information.");
         return new GoPluginIdentifier(EXTENSION_NAME, goSupportedVersions);
     }
 
-    @Override
-    public void initializeGoApplicationAccessor(final GoApplicationAccessor goApplicationAccessor) {
+    static {
+        // plugins are no singletons! use poor-mans singleton code
+
         // initialize background fetching of service token to get user list
-        LOGGER.info("Initializing STUPS authentication plugin...");
-        System.out.println("STUPS Initializing STUPS authentication plugin...");
+        LOG.info("Initializing STUPS authentication plugin...");
 
         try {
             tokens = Tokens.createAccessTokensWithUri(new URI(System.getenv(ENV_ACCESS_TOKEN_URL) + "?realm=/services"))
@@ -67,8 +66,12 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
     }
 
     @Override
+    public void initializeGoApplicationAccessor(final GoApplicationAccessor goApplicationAccessor) {
+        // noop
+    }
+
+    @Override
     public GoPluginApiResponse handle(final GoPluginApiRequest goPluginApiRequest) {
-        System.out.println("STUPS Handling " + goPluginApiRequest.requestName());
         switch (goPluginApiRequest.requestName()) {
             case PLUGIN_AUTHENTICATION_CONFIGURATION:
                 return handlePluginAuthenticationConfigurationRequest();
@@ -77,8 +80,7 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
             case AUTHENTICATE_USER:
                 return handleAuthenticateUserRequest(goPluginApiRequest);
             default:
-                LOGGER.warn("Unknown request from server to me: " + goPluginApiRequest.requestName());
-                System.out.println("STUPS Unknown request from server to me: " + goPluginApiRequest.requestName());
+                LOG.warn("Unknown request from server to me: " + goPluginApiRequest.requestName());
                 return renderResponse(404, null, null);
         }
     }
@@ -113,7 +115,7 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
                             return (Map) JSONUtils.fromJSON(httpResponse.getEntity().getContent());
                         });
             } catch (final Exception e) {
-                e.printStackTrace();
+                LOG.warn("Couldn't include team " + team + " in search result because of an error!", e);
                 continue;
             }
 
@@ -136,16 +138,13 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
         // use password credential grant to verify user password
         try {
             final File clientCredentialsFile = new File(System.getenv("CREDENTIALS_DIR"), "client.json");
-            final Map<String,String> clientCredentials = (Map<String,String>) JSONUtils.fromJSON(clientCredentialsFile);
+            final Map<String, String> clientCredentials = (Map<String, String>) JSONUtils.fromJSON(clientCredentialsFile);
             final String basicAuth = clientCredentials.get("client_id") + ":" + clientCredentials.get("client_secret");
-	    final String basicAuthHash = Base64.getEncoder().encodeToString(basicAuth.getBytes());
-
-	    System.out.println("STUPS DEBUG " + basicAuth + " / " + basicAuthHash);
-	    System.out.println("STUPS DEBUG " + username + " / " + password);
+            final String basicAuthHash = Base64.getEncoder().encodeToString(basicAuth.getBytes());
 
             return Request.Post(new URI(System.getenv(ENV_ACCESS_TOKEN_URL) + "?realm=/employees"))
-                    .addHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(basicAuth.getBytes()))
-		    .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .addHeader("Authorization", "Basic " + basicAuthHash)
+                    .addHeader("Content-Type", "application/x-www-form-urlencoded")
                     .bodyForm(
                             new NameValuePair() {
                                 @Override
@@ -195,17 +194,17 @@ public class STUPSAuthenticationPlugin implements GoPlugin {
                     .handleResponse(httpResponse -> {
                         final int status = httpResponse.getStatusLine().getStatusCode();
                         if (status != 200) {
-			    System.out.println("STUPS Authentication rejected for " + username + ": (" + status + ") "
-					    + httpResponse.getStatusLine().getReasonPhrase());
+                            LOG.warn("Authentication rejected for " + username + ": (" + status + ") "
+                                    + httpResponse.getStatusLine().getReasonPhrase());
                             return renderResponse(SUCCESS_RESPONSE_CODE, null, null);
                         }
                         Map<String, Object> userMap = new HashMap<>();
                         userMap.put("user", getUserJSON(username));
-			System.out.println("STUPS Authenticated user " + username);
+                        LOG.info("Authenticated user " + username);
                         return renderResponse(SUCCESS_RESPONSE_CODE, null, JSONUtils.toJSON(userMap));
                     });
         } catch (final Exception e) {
-            e.printStackTrace();
+            LOG.error("Couldn't authenticate user!", e);
             return renderResponse(INTERNAL_ERROR_RESPONSE_CODE, null, e.toString());
         }
     }
