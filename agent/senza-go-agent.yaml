@@ -11,12 +11,8 @@ SenzaInfo:
       Description: Comma separated list of environments this agent supports.
   - GoAgentCount:
       Description: Count of go-agent's to run in parallel.
-  - PrivateSubnetId:
-      Description: The private subnet ID of the availability zone's matching subnet.
   - InstanceType:
       Description: AWS instance type of your go-server.
-  - ImageId:
-      Description: Latest Taupage AMI ID.
   - ApplicationId:
       Description: ID of the registered application to use for robot access.
   - MintBucket:
@@ -40,7 +36,10 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-      - "{{Arguments.PrivateSubnetId}}"
+        "Fn::FindInMap":
+        - "ServerSubnets"
+        - Ref: "AWS::Region"
+        - "Subnets"
       LaunchConfigurationName:
         Ref: "GoAgentLaunchConfig"
       MinSize: 1
@@ -73,7 +72,11 @@ Resources:
             - "  /var/lib/go-agent:"
             - "    partition: /dev/xvdf"
             - "    erase_on_boot: true"
-      ImageId: "{{Arguments.ImageId}}"
+      ImageId:
+        "Fn::FindInMap":
+        - "Images"
+        - Ref: "AWS::Region"
+        - "LatestTaupageImage"
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile:
         Ref: GoAgentProfile

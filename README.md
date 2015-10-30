@@ -139,25 +139,14 @@ following parameters:
     certificate specified here. The SSL certificate has to cover the above
     generated delivery domain. To find out your SSL certificate's IDs,
     execute the following command: `aws iam list-server-certificates`.
-* PrivateSubnetId 
+* AvailabilityZone
   * An EBS volume is always tied to an availability zone. This means, the
-    Go server also has to run in this zone. This subnet will be the target
-    for your server. You can list all your subnets with the following command:
-    `aws ec2 describe-subnets --filters "Name=availabilityZone,Values=eu-west-1a"`.
-* PublicSubnetId
-  * The actual subnet to use for the load balancer. You can list all your
-    subnets with the following command:
-    `aws ec2 describe-subnets --filters "Name=availabilityZone,Values=eu-west-1a"`.
+    Go server also has to run in this zone.
 * InstanceType
   * With the instance type, you control costs and performance of your running
     Go server.
     [See Amazon's list of instance types](https://aws.amazon.com/ec2/instance-types/).
     TODO figure out good, recommended sizing for InstanceType.
-* ImageId
-  * A Taupage AMI ID, ideally the most recent one. You can use the following
-    command to get a list of Taupage AMIs, the last one should be the most
-    recent one:
-    `aws ec2 describe-images --filters "Name=name,Values=Taupage*" | jq "[.Images[]|{ImageId: .ImageId, Name: .Name, CreationDate: .CreationDate}]|sort_by(.CreationDate)"`
 * AccessTokenUrl
   * The "access token" endpoint of your OAuth2 provider. Something similar to
     `https://example.org/oauth2/access_token`.
@@ -177,10 +166,8 @@ $ senza create server/senza-go-server.yaml server \
     DockerImage=registry.opensource.zalan.do/stups/go-server:<latest version> \
     HostedZone=myteam.example.org \
     SSLCertificateId=arn:aws:iam::1232342423:server-certificate/myteam-example-org \
-    PrivateSubnetId=subnet-acb987 \
-    PublicSubnetId=subnet-acb231 \
+    AvailabilityZone=eu-west-1a \
     InstanceType=c4.large \
-    ImageId=ami-1234fcb \
     AccessTokenUrl=https://example.org/oauth2/access_token \
     TeamServiceUrl=https://teams.example.org \
     Teams=myteam,mypartnerteam \
@@ -225,6 +212,7 @@ working.
   Docker image based on the general one. You can then just copy all necessary
   plugins to `/` like `/foobar-plugin.jar` and those will automatically be
   picked up on boot.
+* Hint: You can use AWS SES SMTP server for sending notification mails.
 
 ### Deploying Go agents
 

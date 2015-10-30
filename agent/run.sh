@@ -16,5 +16,5 @@ if [ ! -z "$GO_SERVER_LINK_PORT_9153_TCP_ADDR" ]; then
 	export STUPS_GO_SERVER_DOMAIN=$GO_SERVER_LINK_PORT_9153_TCP_ADDR
 fi
 
-# go-agent script will switch to go user on start
-exec /usr/share/go-agent/agent.sh go-agent
+# run the agent
+su --preserve-environment go -c "/usr/share/go-agent/agent.sh go-agent"

@@ -7,14 +7,10 @@ SenzaInfo:
       Description: Domain to setup for this go-server.
   - SSLCertificateId:
       Description: The SSL certificate to use on the load balancer.
-  - PrivateSubnetId:
-      Description: The private subnet ID of the availability zone's matching subnet.
-  - PublicSubnetId:
-      Description: The public subnet ID of the availability zone's matching subnet.
+  - AvailabilityZone:
+      Description: The availability zone of your storage EBS.
   - InstanceType:
       Description: AWS instance type of your go-server.
-  - ImageId:
-      Description: Latest Taupage AMI ID.
   - AccessTokenUrl:
       Description: URL of your OAuth2 access_token endpoint.
   - TeamServiceUrl:
@@ -38,13 +34,18 @@ SenzaInfo:
 SenzaComponents:
 - Configuration:
     Type: Senza::StupsAutoConfiguration
+    AvailabilityZones:
+    - "{{Arguments.AvailabilityZone}}"
 
 Resources:
   GoServerAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-      - "{{Arguments.PrivateSubnetId}}"
+        "Fn::FindInMap":
+        - "ServerSubnets"
+        - Ref: "AWS::Region"
+        - "Subnets"
       LaunchConfigurationName:
         Ref: "GoServerLaunchConfig"
       MinSize: 1
@@ -83,7 +84,11 @@ Resources:
             - "  STUPS_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}'"
             - "  STUPS_TEAM_SERVICE_URL: '{{Arguments.TeamServiceUrl}}'"
             - "  STUPS_TEAMS: '{{Arguments.Teams}}'"
-      ImageId: "{{Arguments.ImageId}}"
+      ImageId:
+        "Fn::FindInMap":
+        - "Images"
+        - Ref: "AWS::Region"
+        - "LatestTaupageImage"
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile:
         Ref: GoServerProfile
@@ -97,7 +102,10 @@ Resources:
     Properties:
       LoadBalancerName: "GoServerLoadBalancer"
       Subnets:
-      - "{{Arguments.PublicSubnetId}}"
+        "Fn::FindInMap":
+        - "LoadBalancerSubnets"
+        - Ref: "AWS::Region"
+        - "Subnets"
       Listeners:
       - LoadBalancerPort: "443"
         InstancePort: "9153"
