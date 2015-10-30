@@ -8,7 +8,7 @@ RUN apt-get update && apt-get upgrade -y
 
 # install Go debian package
 COPY *.deb /
-RUN apt-get install unzip && dpkg -i /*.deb && rm /*.deb
+RUN apt-get install -y unzip git subversion && dpkg -i /*.deb && rm /*.deb
 
 # the http port of Go
 EXPOSE 8153

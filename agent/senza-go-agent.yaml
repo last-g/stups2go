@@ -69,6 +69,10 @@ Resources:
             - "  STUPS_GO_SERVER_DOMAIN: '{{Arguments.GoServerDomain}}'"
             - "  STUPS_GO_AGENT_REGISTRATION_KEY: '{{Arguments.GoAgentRegistrationKey}}'"
             - "  STUPS_GO_AGENT_ENVIRONMENTS: '{{Arguments.GoAgentEnvironments}}'"
+            - "mounts:"
+            - "  /var/lib/go-agent:"
+            - "    partition: /dev/xvdf"
+            - "    erase_on_boot: true"
       ImageId: "{{Arguments.ImageId}}"
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile:
@@ -77,6 +81,10 @@ Resources:
       - "Fn::GetAtt":
         - "GoAgentSecurityGroup"
         - "GroupId"
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdf"
+        Ebs:
+          VolumeSize: 100
 
   GoAgentSecurityGroup:
     Type: AWS::EC2::SecurityGroup

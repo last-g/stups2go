@@ -215,6 +215,8 @@ working.
 * [Setup auto registration](http://www.go.cd/documentation/user/current/advanced_usage/agent_auto_register.html)
   in your Go server for Go agents and save your key. Note to generate a good
   random key!
+* [Configure environments](http://www.go.cd/documentation/user/current/configuration/managing_environments.html)
+  that you need. For this setup, create an environment `prod` and an environment `test`.
 * [Read through the whole Go documentation](http://www.go.cd/documentation/user/current/configuration/index.html)
   how to properly configure your server. This appliance did not do any
   configurations for you. Add the users that need access, configure roles,
