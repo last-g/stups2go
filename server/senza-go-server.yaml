@@ -68,6 +68,7 @@ Resources:
             - "mint_bucket: {{Arguments.MintBucket}}"
             - "ports:"
             - "  9153: 9153"
+            - "  9154: 9154"
             - "volumes:"
             - "  ebs:"
             - "    /dev/sdf: go-server-volume"
@@ -104,11 +105,10 @@ Resources:
         SSLCertificateId: "{{Arguments.SSLCertificateId}}"
       - LoadBalancerPort: "9153"
         InstancePort: "9153"
-        Protocol: "HTTP"
+        Protocol: "TCP"
       - LoadBalancerPort: "9154"
-        InstancePort: "9153"
-        Protocol: "HTTPS"
-        SSLCertificateId: "{{Arguments.SSLCertificateId}}"
+        InstancePort: "9154"
+        Protocol: "TCP"
       SecurityGroups:
       - "Fn::GetAtt":
         - "GoServerLBSecurityGroup"
@@ -142,6 +142,14 @@ Resources:
       - IpProtocol: tcp
         FromPort: 9153
         ToPort: 9153
+        SourceSecurityGroupId:
+          "Fn::GetAtt":
+          - "GoServerLBSecurityGroup"
+          - "GroupId"
+      # HTTPS from load balancer
+      - IpProtocol: tcp
+        FromPort: 9154
+        ToPort: 9154
         SourceSecurityGroupId:
           "Fn::GetAtt":
           - "GoServerLBSecurityGroup"

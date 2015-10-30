@@ -60,6 +60,7 @@ Resources:
             - "runtime: Docker"
             - "source: '{{Arguments.DockerImage}}'"
             - "root: true"
+            - "docker_daemon_access: true"
             - "mint_bucket: {{Arguments.MintBucket}}"
             - "{{#Arguments.ScalyrKey}}scalyr_account_key: '{{Arguments.ScalyrKey}}'{{/Arguments.ScalyrKey}}"
             - "{{#Arguments.LogentriesKey}}logentries_account_key: '{{Arguments.LogentriesKey}}'{{/Arguments.LogentriesKey}}"
@@ -72,6 +73,21 @@ Resources:
       InstanceType: "{{Arguments.InstanceType}}"
       IamInstanceProfile:
         Ref: GoAgentProfile
+      SecurityGroups:
+      - "Fn::GetAtt":
+        - "GoAgentSecurityGroup"
+        - "GroupId"
+
+  GoAgentSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: go-agent security group
+      SecurityGroupIngress:
+      # for debugging via piu
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
 
   GoAgentProfile:
     Type: "AWS::IAM::InstanceProfile"
