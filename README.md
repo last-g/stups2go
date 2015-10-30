@@ -313,10 +313,9 @@ $ senza create agent/senza-go-agent.yaml agent \
     GoAgentRegistrationKey=<your generated preshared key> \
     GoAgentEnvironments=test \
     GoAgentCount=10 \
-    PrivateSubnetId=subnet-acb987 \
     InstanceType=m3.medium \
-    ImageId=ami-1234fcb \
     ApplicationId=my-go-appliance \
+    AccessTokenUrl=https://example.org/oauth2/access_token \
     MintBucket=my-stups-mint-bucket-name
 ```
 
@@ -327,6 +326,16 @@ on all your deployment steps. They will have permission to actually deploy
 and tear down your production servers.
 
 TODO define senza template
+
+## Pipeline tooling
+
+The default agent Docker image comes with some predefined tools to work with
+most use cases.
+
+* `/tools/prepare-docker <pierone url>`
+  * Use this command in your pipeline before you pull or push images from your
+    PierOne registry. This will generate a Docker configuration with 
+    appropriate authentication.
 
 ## Build this repository
 

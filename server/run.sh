@@ -35,4 +35,4 @@ chown -R go /data
 
 # run Go as go user
 echo "Starting actual Go server..."
-su --preserve-environment go -c /usr/share/go-server/server.sh
+su go -c /usr/share/go-server/server.sh

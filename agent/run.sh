@@ -17,4 +17,4 @@ if [ ! -z "$GO_SERVER_LINK_PORT_9153_TCP_ADDR" ]; then
 fi
 
 # run the agent
-su --preserve-environment go -c "/usr/share/go-agent/agent.sh go-agent"
+su go -c "/usr/share/go-agent/agent.sh go-agent"

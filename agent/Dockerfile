@@ -11,13 +11,19 @@ COPY *.deb /
 RUN dpkg -i /*.deb && rm /*.deb
 
 # general utilities a very basic agent needs for all STUPS builds
-RUN apt-get install -y git python3-setuptools docker.io
-RUN easy_install3 pip && pip install stups-senza
+RUN apt-get install -y git python3-setuptools curl wget git subversion
+RUN easy_install3 pip && pip install stups-senza stups-tokens stups-pierone
+
+# install recent Docker client
+RUN wget -qO- https://get.docker.com/ | sh
 
 # prepare configuration
 RUN echo "GO_SERVER=\${STUPS_GO_SERVER_DOMAIN}" >> /etc/default/go-agent
 RUN echo "GO_SERVER_PORT=9153" >> /etc/default/go-agent
 RUN echo "DAEMON=N" >> /etc/default/go-agent
+
+# add tooling
+COPY tools /tools
 
 # working dir
 VOLUME /var/lib/go-agent
