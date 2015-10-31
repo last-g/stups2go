@@ -15,3 +15,7 @@ target
 client.json
 user.json
 test-mint-write
+
+# common files, hardlinked with prepare-deps.sh
+/server/extract-files.sh
+/agent/extract-files.sh

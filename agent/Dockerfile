@@ -24,6 +24,7 @@ RUN echo "DAEMON=N" >> /etc/default/go-agent
 
 # add tooling
 COPY tools /tools
+COPY extract-files.sh /extract-files.sh
 
 # working dir
 VOLUME /var/lib/go-agent

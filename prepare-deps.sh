@@ -25,3 +25,10 @@ for f in $FILES; do
 	echo "Checking sha1 sum ($sha1)..."
 	echo "$sha1 $file" | sha1sum -c || exit $?
 done
+
+# setup hardlinks for common files
+echo "Setting up common hardlinks..."
+for file in extract-files.sh; do
+    [ ! -f server/$file ] && ln common/$file server/$file
+    [ ! -f agent/$file ] && ln common/$file agent/$file
+done

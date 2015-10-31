@@ -22,6 +22,9 @@ COPY log4j.properties /log4j.properties
 # add STUPS extensions
 COPY authentication-plugin/target/go-stups-authentication-plugin.jar /
 
+# some tools
+COPY extract-files.sh /extract-files.sh
+
 # run our bootstrap script
 COPY run.sh /run.sh
 CMD /run.sh

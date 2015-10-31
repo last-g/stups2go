@@ -33,6 +33,9 @@ cp /*.jar /data/plugins/external
 echo "Ensuring correct permissions for Go server..."
 chown -R go /data
 
+# extract deploment files
+su go -c /extract-files.sh
+
 # run Go as go user
 echo "Starting actual Go server..."
 su go -c /usr/share/go-server/server.sh

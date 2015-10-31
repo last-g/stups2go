@@ -7,7 +7,7 @@
 
     <groupId>org.zalando</groupId>
     <artifactId>go-stups-authentication-plugin</artifactId>
-    <version>0.1</version>
+    <version>1.0</version>
 
     <name>STUPS go.cd authentication plugin</name>
 

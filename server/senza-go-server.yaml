@@ -21,6 +21,9 @@ SenzaInfo:
       Description: ID of the registered application to use for robot access.
   - MintBucket:
       Description: Name of the application's mint bucket.
+  - Files:
+      Description: Comma separated list of <file>:<base64 content> tuples.
+      Default: ""
   - ScalyrKey:
       Description: Optional key for scalyr logging.
       Default: ""
@@ -84,6 +87,7 @@ Resources:
             - "  STUPS_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}'"
             - "  STUPS_TEAM_SERVICE_URL: '{{Arguments.TeamServiceUrl}}'"
             - "  STUPS_TEAMS: '{{Arguments.Teams}}'"
+            - "  STUPS_FILES: '{{Arguments.Files}}'"
       ImageId:
         "Fn::FindInMap":
         - "Images"

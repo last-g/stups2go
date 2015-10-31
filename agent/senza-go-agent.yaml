@@ -19,6 +19,9 @@ SenzaInfo:
       Description: URL of your OAuth2 access_token endpoint.
   - MintBucket:
       Description: Name of the application's mint bucket.
+  - Files:
+      Description: Comma separated list of <file>:<base64 content> tuples.
+      Default: ""
   - ScalyrKey:
       Description: Optional key for scalyr logging.
       Default: ""
@@ -70,6 +73,7 @@ Resources:
             - "  STUPS_GO_SERVER_DOMAIN: '{{Arguments.GoServerDomain}}'"
             - "  STUPS_GO_AGENT_REGISTRATION_KEY: '{{Arguments.GoAgentRegistrationKey}}'"
             - "  STUPS_GO_AGENT_ENVIRONMENTS: '{{Arguments.GoAgentEnvironments}}'"
+            - "  STUPS_FILES: '{{Arguments.Files}}'"
             - "  OAUTH2_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}?realm=/services'"
             - "mounts:"
             - "  /var/lib/go-agent:"
