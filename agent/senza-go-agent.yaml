@@ -1,3 +1,4 @@
+Description: Go Continuous Delivery Agent ({{Arguments.DockerImage}})
 SenzaInfo:
   StackName: go-agent
   Parameters:

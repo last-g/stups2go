@@ -1,3 +1,4 @@
+Description: Go Continuous Delivery Server ({{Arguments.DockerImage}})
 SenzaInfo:
   StackName: go-server
   Parameters:
