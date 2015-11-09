@@ -32,3 +32,5 @@ for file in extract-files.sh; do
     [ ! -f server/$file ] && ln common/$file server/$file
     [ ! -f agent/$file ] && ln common/$file agent/$file
 done
+
+exit 0
