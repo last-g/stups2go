@@ -107,6 +107,11 @@ Resources:
         FromPort: 22
         ToPort: 22
         CidrIp: 0.0.0.0/0
+      # Prometheus monitoring
+      - IpProtocol: tcp
+        FromPort: 9100
+        ToPort: 9100
+        CidrIp: 0.0.0.0/0
 
   GoAgentProfile:
     Type: "AWS::IAM::InstanceProfile"

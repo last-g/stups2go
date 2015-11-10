@@ -167,6 +167,11 @@ Resources:
           "Fn::GetAtt":
           - "GoServerLBSecurityGroup"
           - "GroupId"
+      # Prometheus monitoring
+      - IpProtocol: tcp
+        FromPort: 9100
+        ToPort: 9100
+        CidrIp: 0.0.0.0/0
 
   GoServerDomain:
     Type: "AWS::Route53::RecordSet"
