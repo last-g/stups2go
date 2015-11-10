@@ -1,0 +1,18 @@
+#!/bin/sh
+
+AGENT_IMAGE=$(grep "source: " /meta/taupage.yaml | awk '{print $2}')
+if [ -z "$AGENT_IMAGE" ]; then
+	echo "WARNING: couldn't figure out agent image!" >&2
+	AGENT_IMAGE="undefined" # ugly hack to make grep happy later
+fi
+
+echo "Removing all tags except for the agent image ${AGENT_IMAGE}..."
+docker images | tail -n +2 | grep -v $AGENT_IMAGE | while read line; do
+	image=$(echo $line | awk '{print $1 ":" $2}')
+	echo "Removing ${image}..."
+	docker rmi $image
+done
+
+echo "Removing dangling images..."
+images=$(docker images -q -f dangling=true)
+[ ! -z "$images" ] && docker rmi $images
