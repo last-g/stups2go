@@ -20,7 +20,7 @@ while [ true ]; do
 	if [ "CREATE_COMPLETE" = "$status" ]; then
 		echo "OK: Stack created successfully."
 		exit 0
-	elif [ "ROLLBACK_COMPLETE" = "$status" ]; then
+	elif [ "ROLLBACK_COMPLETE" = "$status" ] || [ "ROLLBACK_FAILED" = "$status" ]; then
 		echo "FAILED: Stack could not be created! Reasons:"
 
 		aws cloudformation describe-stack-events --stack-name $stackname | jq ".StackEvents[].ResourceStatusReason" | while read line; do
