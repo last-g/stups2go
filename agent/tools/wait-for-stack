@@ -1,5 +1,11 @@
 #!/bin/sh
 
+wait_for_deletion=false
+if [ "$1" = "--deletion" ]; then
+    wait_for_deletion=true
+    shift
+fi
+
 stackname=$1
 if [ -z "$stackname" ]; then
 	echo "Usage:  $0 <stackname> [timeout-in-seconds]" >&2
@@ -17,11 +23,14 @@ elapsed=0
 
 while [ true ]; do
 	status=$(aws cloudformation describe-stacks --stack-name $stackname | jq -r ".Stacks[0].StackStatus")
-	if [ "CREATE_COMPLETE" = "$status" ]; then
+	if [ $wait_for_deletion = false ] && [ "CREATE_COMPLETE" = "$status" ]; then
 		echo "OK: Stack created successfully."
 		exit 0
+    elif [ $wait_for_deletion = true ] && [ -z $status ]; then
+        echo "OK: Stack deleted successfully."
+        exit 0
 	elif [ "ROLLBACK_COMPLETE" = "$status" ] || [ "ROLLBACK_FAILED" = "$status" ]; then
-		echo "FAILED: Stack could not be created! Reasons:"
+		echo "FAILED: Stack could not be created or deleted! Reasons:"
 
 		aws cloudformation describe-stack-events --stack-name $stackname | jq ".StackEvents[].ResourceStatusReason" | while read line; do
 			[ "null" != "$line" ] && echo "Message: $line"
@@ -30,7 +39,7 @@ while [ true ]; do
 		exit 1
 	fi
 
-	echo "Waiting for stack to complete... (current status: $status ; time $(date))"
+	echo "Waiting for stack... (current status: $status ; $(date))"
 	sleep $steps
 
 	elapsed=$(($elapsed + $steps))
