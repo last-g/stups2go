@@ -11,7 +11,7 @@ COPY *.deb /
 RUN dpkg -i /*.deb && rm /*.deb
 
 # general utilities a very basic agent needs for all STUPS builds
-RUN apt-get install -y git python3-setuptools curl wget git subversion
+RUN apt-get install -y git python3-setuptools curl wget git subversion jq
 RUN easy_install3 pip && pip install stups-senza stups-tokens stups-pierone awscli scm-source
 
 # prepare configuration
