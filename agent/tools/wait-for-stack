@@ -1,0 +1,42 @@
+#!/bin/sh
+
+stackname=$1
+if [ -z "$stackname" ]; then
+	echo "Usage:  $0 <stackname> [timeout-in-seconds]" >&2
+	exit 1
+fi
+
+seconds=$2
+if [ -z "$seconds" ]; then
+	echo "Using 1800 seconds as default timeout."
+	seconds=1800
+fi
+
+steps=10 # seconds
+elapsed=0
+
+while [ true ]; do
+	status=$(aws cloudformation describe-stacks --stack-name $stackname | jq -r ".Stacks[0].StackStatus")
+	if [ "CREATE_COMPLETE" = "$status" ]; then
+		echo "OK: Stack created successfully."
+		exit 0
+	elif [ "ROLLBACK_COMPLETE" = "$status" ]; then
+		echo "FAILED: Stack could not be created! Reasons:"
+
+		aws cloudformation describe-stack-events --stack-name $stackname | jq ".StackEvents[].ResourceStatusReason" | while read line; do
+			[ "null" != "$line" ] && echo "Message: $line"
+		done
+
+		exit 1
+	fi
+
+	echo "Waiting for stack to complete... (current status: $status ; time $(date))"
+	sleep $steps
+
+	elapsed=$(($elapsed + $steps))
+
+	if [ $elapsed -gt $seconds ]; then
+		echo "FAILED: Stack could not finish in time!"
+		exit 2
+	fi
+done
