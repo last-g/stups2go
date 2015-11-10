@@ -16,3 +16,5 @@ done
 echo "Removing dangling images..."
 images=$(docker images -q -f dangling=true)
 [ ! -z "$images" ] && docker rmi $images
+
+exit 0
