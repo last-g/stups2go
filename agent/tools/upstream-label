@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+	echo "Usage:  $0 <upstream-name>"
+	exit 1
+fi
+
+NAME=$(echo $1 | tr '[a-z-]' '[A-Z_]')
+VAR_NAME="GO_DEPENDENCY_LABEL_${NAME}"
+
+eval "LABEL=\$$VAR_NAME"
+echo $LABEL
