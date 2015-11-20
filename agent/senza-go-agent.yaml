@@ -76,10 +76,6 @@ Resources:
             - "  STUPS_GO_AGENT_ENVIRONMENTS: '{{Arguments.GoAgentEnvironments}}'"
             - "  STUPS_FILES: '{{Arguments.Files}}'"
             - "  OAUTH2_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}?realm=/services'"
-            - "mounts:"
-            - "  /var/lib/go-agent:"
-            - "    partition: /dev/xvdf"
-            - "    erase_on_boot: true"
       ImageId:
         "Fn::FindInMap":
         - "Images"
@@ -93,7 +89,7 @@ Resources:
         - "GoAgentSecurityGroup"
         - "GroupId"
       BlockDeviceMappings:
-      - DeviceName: "/dev/sdf"
+      - DeviceName: "/dev/sda1"
         Ebs:
           VolumeSize: 100
 
