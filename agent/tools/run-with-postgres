@@ -23,7 +23,7 @@ docker run -d --name $DB_HOST postgres:$DB_VERSION
 
 # wait until db was bootstrapped
 while [ true ]; do
-	docker run --rm -it --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
+	docker run --rm --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
 	[ $? -eq 0 ] && break
 
 	echo "Waiting for database to come up..."

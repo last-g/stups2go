@@ -11,7 +11,7 @@ DOCKER_IMAGE=$1
 shift
 
 # default Docker options to provide necessary directories
-DOCKER_OPTS="-it --rm -e USER_ID=$(id -u) -e HOME=$HOME -v $HOME:$HOME -v /tools:/tools -v $(pwd):/work"
+DOCKER_OPTS="--rm -e USER_ID=$(id -u) -e HOME=$HOME -v $HOME:$HOME -v /tools:/tools -v $(pwd):/work"
 
 PRINT_ONLY=false
 
