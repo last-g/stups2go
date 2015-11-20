@@ -19,7 +19,7 @@ PRINT_ONLY=false
 while [ "$1" != "--" ]; do
 	[ -z "$1" ] && usage_exit
 
-	if [ "$1" == "--print-docker-command" ]; then
+	if [ "$1" = "--print-docker-command" ]; then
 		PRINT_ONLY=true
 		shift
 		continue

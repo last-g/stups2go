@@ -1,45 +1,55 @@
 #!/bin/sh
 
-if [ $# -ne 3 ]; then
-	echo "Usage:  $0 <postgres-version> <dbname> <command>" >&2
+if [ $# -lt 5 ]; then
+	echo "Usage:  $0 <postgres-version> <dbname> <docker-image> [<docker-opts>] -- <command>" >&2
 	exit 1
 fi
 
-# find out docker IP where ports will be exposed
-DOCKER_IP=$(ip a show eth0 scope global | grep inet | awk '{print $2}' | sed -E 's#[0-9]+/16#1#')
-echo "Database IP will be: $DOCKER_IP"
+DOCKER_IMAGE=$3
 
 # prepare environment variables
 export DB_VERSION=$1
 export DB_NAME=$2
-export DB_HOST=$DOCKER_IP
-export DB_PORT=15432
+export DB_HOST=test-postgres
+export DB_PORT=5432
 export DB_SUBNAME="//$DB_HOST:$DB_PORT/$DB_NAME"
 export DB_USER=postgres
 export DB_PASSWORD=
 
 # start postgres
 echo "Starting PostgreSQL database..."
-docker run -d --name test-postgres postgres:$DB_VERSION
+docker run -d --name $DB_HOST postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
 while [ true ]; do
-	docker run --rm -it --link test-postgres postgres:$DB_VERSION -- psql -h test-postgres -p 5432 -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
+	docker run --rm -it --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
 	[ $? -eq 0 ] && break
 
 	echo "Waiting for database to come up..."
 	sleep 5
 done
 
+# remove first 3 args
+shift 3
+
+# add custom Docker options
+while [ "$1" != "--" ]; do
+	DOCKER_OPTS="$DOCKER_OPTS $1"
+	shift
+done
+shift
+
+DOCKER_OPTS="$DOCKER_OPTS --link $DB_HOST -e DB_SUBNAME=$DB_SUBNAME"
+
 # execute real command
 echo "Database ready, running actual command..."
-$3
+./run $DOCKER_IMAGE $DOCKER_OPTS -- $*
 status=$?
 
 # shutdown postgres
 echo "Shutting down database..."
-docker rm -f -v test-postgres
+docker rm -f -v $DB_HOST
 [ $? -ne 0 ] && echo "Could not cleanly shut down PostgreSQL server!"
 
 # give correct feedback
