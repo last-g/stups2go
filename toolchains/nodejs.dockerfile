@@ -11,4 +11,4 @@ RUN npm i -g npm
 
 WORKDIR /work
 COPY switch-user.sh /switch-user.sh
-ENTRYPOINT /switch-user.sh
+ENTRYPOINT ["/switch-user.sh"]

@@ -6,4 +6,4 @@ RUN pip3 install wheel virtualenv
 
 WORKDIR /work
 COPY switch-user.sh /switch-user.sh
-ENTRYPOINT /switch-user.sh
+ENTRYPOINT ["/switch-user.sh"]

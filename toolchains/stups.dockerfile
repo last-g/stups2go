@@ -5,4 +5,4 @@ RUN pip3 install stups scm-source awscli
 
 WORKDIR /work
 COPY switch-user.sh /switch-user.sh
-ENTRYPOINT /switch-user.sh
+ENTRYPOINT ["/switch-user.sh"]
