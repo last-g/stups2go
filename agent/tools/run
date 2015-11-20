@@ -1,0 +1,47 @@
+#!/bin/sh
+
+usage_exit() {
+	echo "Usage:  $0 <docker-image> [docker-options] -- <command>" >&2
+	exit 1
+}
+
+# the chosen toolchain
+DOCKER_IMAGE=$1
+[ -z "$DOCKER_IMAGE" ] && usage_exit
+shift
+
+# default Docker options to provide necessary directories
+DOCKER_OPTS="-it --rm -e USER_ID=$(id -u) -e HOME=$HOME -v $HOME:$HOME -v /tools:/tools -v $(pwd):/work"
+
+PRINT_ONLY=false
+
+# add custom Docker options
+while [ "$1" != "--" ]; do
+	[ -z "$1" ] && usage_exit
+
+	if [ "$1" == "--print-docker-command" ]; then
+		PRINT_ONLY=true
+		shift
+		continue
+	fi
+
+	DOCKER_OPTS="$DOCKER_OPTS $1"
+	shift
+done
+shift
+
+# what do you want to do?
+COMMAND=$*
+[ -z "$COMMAND" ] && usage_exit
+
+# default command is "docker" but can be overridden with DOCKER_COMMAND
+[ -z "$DOCKER_COMMAND" ] && DOCKER_COMMAND="docker"
+
+# do it!
+RUN_COMMAND="$DOCKER_COMMAND run $DOCKER_OPTS $DOCKER_IMAGE $COMMAND"
+
+if [ $PRINT_ONLY = true ]; then
+	echo $RUN_COMMAND
+else
+	$RUN_COMMAND
+fi
