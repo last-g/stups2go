@@ -3,6 +3,10 @@
 FROM zalando/openjdk:8u66-b17-1-2
 MAINTAINER Zalando SE
 
+# shareable volumes for sub containers
+VOLUME /var/lib/go-agent
+VOLUME /var/go
+
 # keep image updated
 RUN apt-get update && apt-get upgrade -y
 
@@ -21,9 +25,6 @@ RUN echo "DAEMON=N" >> /etc/default/go-agent
 # add tooling
 COPY tools /tools
 COPY extract-files.sh /extract-files.sh
-
-# working dir
-VOLUME /var/lib/go-agent
 
 # our own script with runtime preparations
 COPY run.sh /run.sh
