@@ -343,11 +343,11 @@ most use cases.
 $ ./prepare-deps.sh
 
 $ cd server
-$ docker build -t registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT .
+$ docker build -t registry.opensource.zalan.do/stups/go-server:1.0 .
 $ cd ..
 
 $ cd agent
-$ docker build -t registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT .
+$ docker build -t registry.opensource.zalan.do/stups/go-agent:1.0 .
 $ cd ..
 ```
 
@@ -356,11 +356,11 @@ Run containers locally for testing:
 ```bash
 $ docker run --name go-server \
              -p 8153:8153 \
-             -d registry.opensource.zalan.do/stups/go-server:0-SNAPSHOT
+             -d registry.opensource.zalan.do/stups/go-server:1.0
 
 $ docker run --link go-server:go-server-link \
              -v /var/run/docker.sock:/var/run/docker.sock \
-             -d registry.opensource.zalan.do/stups/go-agent:0-SNAPSHOT
+             -d registry.opensource.zalan.do/stups/go-agent:1.0
 ```
 
 ## Known Limitations
