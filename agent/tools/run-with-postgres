@@ -6,26 +6,26 @@ if [ $# -ne 3 ]; then
 fi
 
 # find out docker IP where ports will be exposed
-DOCKER_IP=$(ip a | grep inet | grep eth0 | awk '{print $2}' | sed -E 's#[0-9]+/16#1#')
+DOCKER_IP=$(ip a show eth0 scope global | grep inet | awk '{print $2}' | sed -E 's#[0-9]+/16#1#')
 echo "Database IP will be: $DOCKER_IP"
 
 # prepare environment variables
 export DB_VERSION=$1
 export DB_NAME=$2
 export DB_HOST=$DOCKER_IP
-export DB_PORT=5432
+export DB_PORT=15432
 export DB_SUBNAME="//$DB_HOST:$DB_PORT/$DB_NAME"
 export DB_USER=postgres
 export DB_PASSWORD=
 
 # start postgres
 echo "Starting PostgreSQL database..."
-docker run -d -p $DB_PORT:5432 --name test-postgres postgres:$DB_VERSION
+docker run -d --name test-postgres postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
 while [ true ]; do
-	docker run --rm -it postgres:$DB_VERSION -- psql -h $DB_HOST -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
+	docker run --rm -it --link test-postgres postgres:$DB_VERSION -- psql -h test-postgres -p 5432 -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
 	[ $? -eq 0 ] && break
 
 	echo "Waiting for database to come up..."
