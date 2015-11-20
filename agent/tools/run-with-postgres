@@ -20,12 +20,12 @@ export DB_PASSWORD=
 
 # start postgres
 echo "Starting PostgreSQL database..."
-docker run -d -p $DB_PORT:5432 --name test-postgres postgres:$DB_VERSION
+docker run -d --name test-postgres postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
 while [ true ]; do
-	docker run --rm -it postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
+	docker run --rm -it --link test-postgres postgres:$DB_VERSION -- psql -h test-postgres -p 5432 -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
 	[ $? -eq 0 ] && break
 
 	echo "Waiting for database to come up..."
