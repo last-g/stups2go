@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [ $# -lt 5 ]; then
-	echo "Usage:  $0 <postgres-version> <dbname> <docker-image> [<docker-opts>] -- <command>" >&2
-	exit 1
+    echo "Usage:  $0 <postgres-version> <dbname> <docker-image> [<docker-opts>] -- <command>" >&2
+    exit 1
 fi
 
 DOCKER_IMAGE=$3
@@ -21,12 +21,23 @@ docker run -d --name $DB_HOST postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
+COUNTER=0
 while [ true ]; do
-	docker run --rm --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
-	[ $? -eq 0 ] && break
+    docker run --rm --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
+    [ $? -eq 0 ] && break
 
-	echo "Waiting for database to come up..."
-	sleep 5
+    if [ $COUNTER -gt 60 ]; then
+        echo "Not waiting any longer for PostgreSQL database to come up!"
+
+        docker rm -f -v $DB_HOST
+        [ $? -ne 0 ] && echo "Could not cleanly shut down PostgreSQL server!"
+
+        exit 1
+    fi
+
+    echo "Waiting for database to come up..."
+    sleep 5
+    COUNTER=$(($COUNTER + 5))
 done
 
 # remove first 3 args, we saved them leaving us with docker opts and command for the run tool
