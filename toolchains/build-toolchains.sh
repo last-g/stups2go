@@ -1,7 +1,7 @@
 #!/bin/sh
 
-cd $(basename $0)
-source ./build-versions.sh
+cd $(dirname $0)
+. ./build-versions.sh
 
 for toolchain in $TOOLCHAINS; do
 	file=$(echo $toolchain | sed 's/:.*//g')
