@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./build-versions.sh
+. ./build-versions.sh
 
 FAILED=
 for toolchain in $TOOLCHAINS; do
