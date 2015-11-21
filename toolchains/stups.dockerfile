@@ -1,6 +1,6 @@
 FROM zalando/python:3.5.0-3
 
-RUN apt-get update && apt-get install -y jq
+RUN apt-get update && apt-get install -y jq git
 RUN pip3 install stups scm-source awscli
 
 COPY switch-user.sh /switch-user.sh
