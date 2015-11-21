@@ -25,7 +25,7 @@ fi
 
 # default Docker options to provide necessary directories
 # https://docs.docker.com/engine/userguide/dockervolumes/#creating-and-mounting-a-data-volume-container
-DOCKER_OPTS="--rm -e USER_ID=$(id -u) -e HOME=$HOME --volumes-from $DOCKER_AGENT_CONTAINER -w $(pwd)"
+DOCKER_OPTS="--rm -e USER_ID=$(id -u) -e HOME=$HOME --volumes-from $DOCKER_AGENT_CONTAINER -w $(pwd) -v /meta:/meta -e CREDENTIALS_DIR=$CREDENTIALS_DIR"
 
 PRINT_ONLY=false
 

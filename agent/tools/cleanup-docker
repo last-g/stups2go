@@ -12,7 +12,7 @@ if [ -z "$AGENT_IMAGE" ]; then
 fi
 
 echo "Removing all old tags except for the agent image ${AGENT_IMAGE}..."
-docker images | tail -n +2 | grep -v $AGENT_IMAGE | grep "days" | while read line; do
+docker images | tail -n +2 | grep -v $AGENT_IMAGE | grep -E "days ago|weeks ago" | while read line; do
 	image=$(echo $line | awk '{print $1 ":" $2}')
 	echo "Removing ${image}..."
 	docker rmi $image
