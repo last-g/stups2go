@@ -11,12 +11,13 @@ if [ -z "$AGENT_IMAGE" ]; then
 	AGENT_IMAGE="undefined" # ugly hack to make grep happy later
 fi
 
-echo "Removing all old tags except for the agent image ${AGENT_IMAGE}..."
-docker images | tail -n +2 | grep -v $AGENT_IMAGE | grep -E "days ago|weeks ago" | while read line; do
-	image=$(echo $line | awk '{print $1 ":" $2}')
-	echo "Removing ${image}..."
-	docker rmi $image
-done
+# TODO this logic currently sucks, see https://github.com/zalando/stups2go/issues/16
+#echo "Removing all old tags except for the agent image ${AGENT_IMAGE}..."
+#docker images | tail -n +2 | grep -v $AGENT_IMAGE | grep -E "days ago|weeks ago" | while read line; do
+#	image=$(echo $line | awk '{print $1 ":" $2}')
+#	echo "Removing ${image}..."
+#	docker rmi $image
+#done
 
 echo "Removing dangling images..."
 images=$(docker images -q -f dangling=true)
