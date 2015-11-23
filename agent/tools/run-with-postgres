@@ -1,9 +1,12 @@
 #!/bin/sh
 
+TOOLS_DIR=$(dirname $0)
+
 if [ $# -lt 5 ]; then
     echo "Usage:  $0 <postgres-version> <dbname> <docker-image> [<docker-opts>] -- <command>" >&2
     exit 1
 fi
+
 
 DOCKER_IMAGE=$3
 
@@ -13,29 +16,32 @@ DB_HOST=test-postgres
 DB_PORT=5432
 DB_SUBNAME="//$DB_HOST:$DB_PORT/$DB_NAME"
 DB_USER=postgres
-DB_PASSWORD=
+DB_PASSWORD=postgres
+
+# clean-up old Docker container
+docker rm -fv $DB_HOST
 
 # start postgres
-echo "Starting PostgreSQL database..."
-docker run -d --name $DB_HOST postgres:$DB_VERSION
+echo "INFO: Starting PostgreSQL database..."
+docker run -d --name $DB_HOST -e POSTGRES_PASSWORD=$DB_PASSWORD postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
 COUNTER=0
 while [ true ]; do
-    docker run --rm --link $DB_HOST postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
+    docker run --rm --link $DB_HOST -e PGPASSWORD=$DB_PASSWORD postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
     [ $? -eq 0 ] && break
 
     if [ $COUNTER -gt 60 ]; then
-        echo "Not waiting any longer for PostgreSQL database to come up!"
+        echo "ERROR: Not waiting any longer for PostgreSQL database to come up!"
 
         docker rm -f -v $DB_HOST
-        [ $? -ne 0 ] && echo "Could not cleanly shut down PostgreSQL server!"
+        [ $? -ne 0 ] && echo "ERROR: Could not cleanly shut down PostgreSQL server!"
 
         exit 1
     fi
 
-    echo "Waiting for database to come up..."
+    echo "INFO: Waiting for database to come up..."
     sleep 5
     COUNTER=$(($COUNTER + 5))
 done
@@ -47,14 +53,14 @@ shift 3
 DOCKER_OPTS="--link $DB_HOST -e DB_SUBNAME=$DB_SUBNAME -e DB_NAME=$DB_NAME -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_USER=$DB_USER -e DB_PASSWORD=$DB_PASSWORD"
 
 # execute real command
-echo "Database ready, running actual command..."
-/tools/run $DOCKER_IMAGE $DOCKER_OPTS $*
+echo "INFO: Database ready, running actual command..."
+$TOOLS_DIR/run $DOCKER_IMAGE $DOCKER_OPTS $*
 status=$?
 
 # shutdown postgres
-echo "Shutting down database..."
+echo "INFO: Shutting down database..."
 docker rm -f -v $DB_HOST
-[ $? -ne 0 ] && echo "Could not cleanly shut down PostgreSQL server!"
+[ $? -ne 0 ] && echo "ERROR: Could not cleanly shut down PostgreSQL server!"
 
 # give correct feedback
 exit $status
