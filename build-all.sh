@@ -14,8 +14,8 @@ mvn -f server/authentication-plugin/pom.xml clean package
 [ -z "$VERSION" ] && VERSION=0-SNAPSHOT
 
 # build Docker images
-docker build --no-cache -f server/Dockerfile -t registry.opensource.zalan.do/stups/go-server:$VERSION server
-docker build --no-cache -f agent/Dockerfile -t registry.opensource.zalan.do/stups/go-agent:$VERSION agent
+docker build -f server/Dockerfile -t registry.opensource.zalan.do/stups/go-server:$VERSION server
+docker build -f agent/Dockerfile -t registry.opensource.zalan.do/stups/go-agent:$VERSION agent
 
 # build toolchains
 toolchains/build-toolchains.sh
