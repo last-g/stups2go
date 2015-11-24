@@ -3,17 +3,17 @@
 [Go Continuous Delivery](http://www.go.cd/) service based on the
 [STUPS infrastructure](https://stups.io).
 
-WORK IN PROGRESS; ABSOLUTLY NOT FINISHED
+WORK IN PROGRESS; ABSOLUTELY NOT FINISHED
 
 ## Target Audience
 
 You are working with a [STUPS infrastructure](https://stups.io) and you need
 a flexible and powerful continuous delivery tool. You are advanced in operating
-servers and you know how your delivery pipline has to be structured.
+servers and you know how your delivery pipeline has to be structured.
 
 This appliance provides a raw, mostly unconfigured
 [Go Continuous Delivery](http://www.go.cd/) setup. This appliance's goal is to
-prepare integration with STUPS infrastructures (like authnz, PierOne support,
+prepare integration with STUPS infrastructures (like authnz, Pier One support,
 senza deployments, auto scaling). It makes no assumptions how you want to
 structure your delivery pipelines or with which technologies you want to work.
 Continuous delivery pipelines differ greatly for each and every project and
@@ -35,7 +35,7 @@ tests. This also means that those can be very tiny (t2.micro) instances.
 
 Most real work will be done by "builder" Go agents in your testing account.
 These have no access to the production servers, so that your tests shouldn't
-be able to accdidentally influence your production systems (like exhausting
+be able to accidentally influence your production systems (like exhausting
 instance limits). They can be bought with Spot Fleet as they do not have
 serious availability requirements. You can size the servers however you need
 for your delivery pipelines.
@@ -52,7 +52,7 @@ setup regular snappshotting for backups and also use encryption to have your
 data encrypted at rest.
 
 
-### General initilisation
+### General initialization
 
 The default setup requires the main EBS to exist. With the following steps, you
 can easily set one up as necessary. Carefully review every command, especially
@@ -234,7 +234,7 @@ arguments are those:
 
 #### Customize your Go agent
 
-It is not forseeable whatever technology you use, so this appliance expects
+It is not foreseeable whatever technology you use, so this appliance expects
 you to build your own agent based on the one provided here. An example
 Dockerfile could be build like that for a typical Java environment:
 
@@ -273,7 +273,7 @@ Note that Docker and the STUPS tooling is preinstalled on the default agent.
 Builder agents are meant to be deployed in a non-production AWS account. Those
 should do the main work like compiling, testing and packaging your artifacts.
 They can also do big integration tests with the resources of the test account
-without accidentially affecting your production systems. Make sure you switched
+without accidentally affecting your production systems. Make sure you switched
 your account to your test account with `mai login ...`.
 
 At first, you need to open your mint bucket to your test account, in order to
@@ -334,7 +334,7 @@ most use cases.
 
 * `/tools/prepare-docker <pierone url>`
   * Use this command in your pipeline before you pull or push images from your
-    PierOne registry. This will generate a Docker configuration with 
+    PierOne registry. This will generate a Docker configuration with
     appropriate authentication.
 
 ## Build this repository
