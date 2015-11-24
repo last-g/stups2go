@@ -1,4 +1,4 @@
-FROM zalando/ubuntu:15.10-2
+FROM zalando/python:3.5.0-3
 
 # newer nodejs
 RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
