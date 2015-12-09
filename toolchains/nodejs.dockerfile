@@ -4,7 +4,7 @@ FROM zalando/python:3.5.0-4
 RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
 
 # general tools
-RUN apt-get install -y nodejs build-essential
+RUN apt-get install -y nodejs build-essential git
 
 # upgrade npm to a sane version
 RUN npm i -g npm
