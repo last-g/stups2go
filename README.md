@@ -159,6 +159,17 @@ following parameters:
 * MintBucket
   * Your mint bucket, where your application credentials are synced to.
 
+The following parameters are optional:
+
+* Files
+  * Comma separated list of <file>:<base64 content> tuples.
+* ScalyrKey:
+  * Optional key for scalyr logging.
+* LogentriesKey:
+  *Description: Optional key for logentries logging.
+* AppdynamicsApplication:
+  * Description: Optional AppDynamics application name.
+
 An example deployment might look like that:
 
 ```bash
@@ -172,7 +183,8 @@ $ senza create server/senza-go-server.yaml server \
     TeamServiceUrl=https://teams.example.org \
     Teams=myteam,mypartnerteam \
     ApplicationId=my-go-appliance \
-    MintBucket=my-stups-mint-bucket-name
+    MintBucket=my-stups-mint-bucket-name \
+    ScalyrKey=1234567890abc1234567890 # optional
 ```
 
 This will now spin up the Go server for you with a proper production ready
@@ -214,23 +226,10 @@ working.
   picked up on boot.
 * Hint: You can use AWS SES SMTP server for sending notification mails.
 
-### Deploying Go agents
+### Go Agents
 
-The go-agent templates take similar arguments as the go-server. The extra
-arguments are those:
-
-* GoServerDomain
-  * The domain where you find your Go server e.g. `delivery.example.org`.
-* GoAgentRegistrationKey
-  * The preshared registration key for Go agents to automatically register
-    with your Go server.
-* GoAgentEnvironments
-  * The environment to announce to the Go server. As an example, this could
-    be `test` or `prod`.
-* GoAgentCount
-  * Your agents will run in an auto scaling group but currently there is no
-    metric to truly automatically scale. You can manage the count of agents
-    dynamically with your ASG.
+Deploying Go agents is a little bit more elaborate, since they can differ between usecases 
+and your environments.
 
 #### Customize your Go agent
 
@@ -304,7 +303,33 @@ The policy to attach to your bucket should look look similar to that:
 }
 ```
 
-Now you can bootstrap your agents like that:
+#### Deployer agents
+
+Deployer agents have access to your production system and should mainly focus
+on all your deployment steps. They will have permission to actually deploy
+and tear down your production servers.
+
+TODO define senza template
+
+#### Deploying Go agents
+
+The go-agent templates take similar arguments as the go-server. The extra
+arguments are those:
+
+* GoServerDomain
+  * The domain where you find your Go server e.g. `delivery.example.org`.
+* GoAgentRegistrationKey
+  * The preshared registration key for Go agents to automatically register
+    with your Go server.
+* GoAgentEnvironments
+  * The environment to announce to the Go server. As an example, this could
+    be `test` or `prod`.
+* GoAgentCount
+  * Your agents will run in an auto scaling group but currently there is no
+    metric to truly automatically scale. You can manage the count of agents
+    dynamically with your ASG.
+
+An example deployment might look like this:
 
 ```bash
 $ senza create agent/senza-go-agent.yaml agent \
@@ -316,16 +341,9 @@ $ senza create agent/senza-go-agent.yaml agent \
     InstanceType=m3.medium \
     ApplicationId=my-go-appliance \
     AccessTokenUrl=https://example.org/oauth2/access_token \
-    MintBucket=my-stups-mint-bucket-name
+    MintBucket=my-stups-mint-bucket-name \
+    ScalyrKey=1234567890abc1234567890 # optional
 ```
-
-#### Deployer agents
-
-Deployer agents have access to your production system and should mainly focus
-on all your deployment steps. They will have permission to actually deploy
-and tear down your production servers.
-
-TODO define senza template
 
 ## Pipeline tooling
 
