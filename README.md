@@ -240,6 +240,7 @@ Dockerfile could be build like that for a typical Java environment:
 ```
 FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
 RUN apt-get install -y maven npm
+CMD /run.sh
 ```
 
 A typical Clojure environment could look like that:
