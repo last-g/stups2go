@@ -249,6 +249,8 @@ FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
         && chmod +x /usr/local/bin/lein \
         && su - go -c "lein --version"
+
+CMD /run.sh
 ```
 
 And obviously you can combine whatever you need at your builds like that:
@@ -263,6 +265,7 @@ RUN apt-get install -y maven npm
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
         && chmod +x /usr/local/bin/lein \
         && su - go -c "lein --version"
+CMD /run.sh
 ```
 
 Note that Docker and the STUPS tooling is preinstalled on the default agent.
