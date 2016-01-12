@@ -166,9 +166,9 @@ The following parameters are optional:
 * ScalyrKey:
   * Optional key for scalyr logging.
 * LogentriesKey:
-  * Description: Optional key for logentries logging.
+  * Optional key for logentries logging.
 * AppdynamicsApplication:
-  * Description: Optional AppDynamics application name.
+  * Optional AppDynamics application name.
 
 An example deployment might look like that:
 
