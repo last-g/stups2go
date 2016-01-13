@@ -1,7 +1,7 @@
 FROM zalando/python:3.5.0-4
 
 # newer nodejs
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_5.x | bash -
 
 # general tools
 RUN apt-get install -y nodejs build-essential git
