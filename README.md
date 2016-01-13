@@ -159,6 +159,17 @@ following parameters:
 * MintBucket
   * Your mint bucket, where your application credentials are synced to.
 
+The following parameters are optional:
+
+* Files
+  * Comma separated list of <file>:<base64 content> tuples.
+* ScalyrKey:
+  * Optional key for scalyr logging.
+* LogentriesKey:
+  * Optional key for logentries logging.
+* AppdynamicsApplication:
+  * Optional AppDynamics application name.
+
 An example deployment might look like that:
 
 ```bash
@@ -172,7 +183,8 @@ $ senza create server/senza-go-server.yaml server \
     TeamServiceUrl=https://teams.example.org \
     Teams=myteam,mypartnerteam \
     ApplicationId=my-go-appliance \
-    MintBucket=my-stups-mint-bucket-name
+    MintBucket=my-stups-mint-bucket-name \
+    ScalyrKey=1234567890abc1234567890 # optional
 ```
 
 This will now spin up the Go server for you with a proper production ready
@@ -214,23 +226,10 @@ working.
   picked up on boot.
 * Hint: You can use AWS SES SMTP server for sending notification mails.
 
-### Deploying Go agents
+### Go Agents
 
-The go-agent templates take similar arguments as the go-server. The extra
-arguments are those:
-
-* GoServerDomain
-  * The domain where you find your Go server e.g. `delivery.example.org`.
-* GoAgentRegistrationKey
-  * The preshared registration key for Go agents to automatically register
-    with your Go server.
-* GoAgentEnvironments
-  * The environment to announce to the Go server. As an example, this could
-    be `test` or `prod`.
-* GoAgentCount
-  * Your agents will run in an auto scaling group but currently there is no
-    metric to truly automatically scale. You can manage the count of agents
-    dynamically with your ASG.
+Deploying Go agents is a little bit more elaborate, since they can differ between usecases 
+and your environments.
 
 #### Customize your Go agent
 
@@ -241,6 +240,7 @@ Dockerfile could be build like that for a typical Java environment:
 ```
 FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
 RUN apt-get install -y maven npm
+CMD /run.sh
 ```
 
 A typical Clojure environment could look like that:
@@ -250,6 +250,8 @@ FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
         && chmod +x /usr/local/bin/lein \
         && su - go -c "lein --version"
+
+CMD /run.sh
 ```
 
 And obviously you can combine whatever you need at your builds like that:
@@ -264,6 +266,7 @@ RUN apt-get install -y maven npm
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
         && chmod +x /usr/local/bin/lein \
         && su - go -c "lein --version"
+CMD /run.sh
 ```
 
 Note that Docker and the STUPS tooling is preinstalled on the default agent.
@@ -304,7 +307,33 @@ The policy to attach to your bucket should look look similar to that:
 }
 ```
 
-Now you can bootstrap your agents like that:
+#### Deployer agents
+
+Deployer agents have access to your production system and should mainly focus
+on all your deployment steps. They will have permission to actually deploy
+and tear down your production servers.
+
+TODO define senza template
+
+#### Deploying Go agents
+
+The go-agent templates take similar arguments as the go-server. The extra
+arguments are those:
+
+* GoServerDomain
+  * The domain where you find your Go server e.g. `delivery.example.org`.
+* GoAgentRegistrationKey
+  * The preshared registration key for Go agents to automatically register
+    with your Go server.
+* GoAgentEnvironments
+  * The environment to announce to the Go server. As an example, this could
+    be `test` or `prod`.
+* GoAgentCount
+  * Your agents will run in an auto scaling group but currently there is no
+    metric to truly automatically scale. You can manage the count of agents
+    dynamically with your ASG.
+
+An example deployment might look like this:
 
 ```bash
 $ senza create agent/senza-go-agent.yaml agent \
@@ -316,24 +345,20 @@ $ senza create agent/senza-go-agent.yaml agent \
     InstanceType=m3.medium \
     ApplicationId=my-go-appliance \
     AccessTokenUrl=https://example.org/oauth2/access_token \
-    MintBucket=my-stups-mint-bucket-name
+    MintBucket=my-stups-mint-bucket-name \
+    ScalyrKey=1234567890abc1234567890 # optional
 ```
-
-#### Deployer agents
-
-Deployer agents have access to your production system and should mainly focus
-on all your deployment steps. They will have permission to actually deploy
-and tear down your production servers.
-
-TODO define senza template
 
 ## Pipeline tooling
 
-The default agent Docker image comes with some predefined tools to work with
-most use cases.
+To centralize several common tasks, we created some toolchains to predefine some workloads. These can be used by Pipelines:
 
-* `/tools/prepare-docker <pierone url>`
-  * Use this command in your pipeline before you pull or push images from your
+* scm-source.json creation
+  * `/tools/run registry.opensource.zalan.do/stups/toolchain-stups:<version> -- scm-source -f <target_scm_source_json_file>`
+    * use this to create your scm-source.json, which is needed to identify the code base the docker image will use.
+* pierone login
+  * `/tools/run registry.opensource.zalan.do/stups/toolchain-stups:<version> -e OAUTH2_ACCESS_TOKEN_URL=https://example.org/oauth2/access_token -- login-pierone <pierone url>`
+    * Use this command in your pipeline before you pull or push images from your
     PierOne registry. This will generate a Docker configuration with
     appropriate authentication.
 
