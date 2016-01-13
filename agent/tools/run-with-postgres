@@ -1,46 +1,66 @@
 #!/bin/sh
 
-if [ $# -ne 3 ]; then
-	echo "Usage:  $0 <postgres-version> <dbname> <command>" >&2
-	exit 1
+TOOLS_DIR=$(dirname $0)
+
+if [ $# -lt 5 ]; then
+    echo "Usage:  $0 <postgres-version> <dbname> <docker-image> [<docker-opts>] -- <command>" >&2
+    exit 1
 fi
 
-# find out docker IP where ports will be exposed
-DOCKER_IP=$(ip a show eth0 scope global | grep inet | awk '{print $2}' | sed -E 's#[0-9]+/16#1#')
-echo "Database IP will be: $DOCKER_IP"
 
-# prepare environment variables
-export DB_VERSION=$1
-export DB_NAME=$2
-export DB_HOST=$DOCKER_IP
-export DB_PORT=15432
-export DB_SUBNAME="//$DB_HOST:$DB_PORT/$DB_NAME"
-export DB_USER=postgres
-export DB_PASSWORD=
+DOCKER_IMAGE=$3
+
+DB_VERSION=$1
+DB_NAME=$2
+DB_HOST=test-postgres
+DB_PORT=5432
+DB_SUBNAME="//$DB_HOST:$DB_PORT/$DB_NAME"
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# clean-up old Docker container
+docker rm -fv $DB_HOST
 
 # start postgres
-echo "Starting PostgreSQL database..."
-docker run -d --name test-postgres postgres:$DB_VERSION
+echo "INFO: Starting PostgreSQL database..."
+docker run -d --name $DB_HOST -e POSTGRES_PASSWORD=$DB_PASSWORD postgres:$DB_VERSION
 [ $? -ne 0 ] && exit 1
 
 # wait until db was bootstrapped
+COUNTER=0
 while [ true ]; do
-	docker run --rm -it --link test-postgres postgres:$DB_VERSION -- psql -h test-postgres -p 5432 -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
-	[ $? -eq 0 ] && break
+    docker run --rm --link $DB_HOST -e PGPASSWORD=$DB_PASSWORD postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
+    [ $? -eq 0 ] && break
 
-	echo "Waiting for database to come up..."
-	sleep 5
+    if [ $COUNTER -gt 60 ]; then
+        echo "ERROR: Not waiting any longer for PostgreSQL database to come up!"
+
+        docker rm -f -v $DB_HOST
+        [ $? -ne 0 ] && echo "ERROR: Could not cleanly shut down PostgreSQL server!"
+
+        exit 1
+    fi
+
+    echo "INFO: Waiting for database to come up..."
+    sleep 5
+    COUNTER=$(($COUNTER + 5))
 done
 
+# remove first 3 args, we saved them leaving us with docker opts and command for the run tool
+shift 3
+
+# container link and setup
+DOCKER_OPTS="--link $DB_HOST -e DB_SUBNAME=$DB_SUBNAME -e DB_NAME=$DB_NAME -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_USER=$DB_USER -e DB_PASSWORD=$DB_PASSWORD"
+
 # execute real command
-echo "Database ready, running actual command..."
-$3
+echo "INFO: Database ready, running actual command..."
+$TOOLS_DIR/run $DOCKER_IMAGE $DOCKER_OPTS $*
 status=$?
 
 # shutdown postgres
-echo "Shutting down database..."
-docker rm -f -v test-postgres
-[ $? -ne 0 ] && echo "Could not cleanly shut down PostgreSQL server!"
+echo "INFO: Shutting down database..."
+docker rm -f -v $DB_HOST
+[ $? -ne 0 ] && echo "ERROR: Could not cleanly shut down PostgreSQL server!"
 
 # give correct feedback
 exit $status

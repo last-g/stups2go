@@ -10,8 +10,26 @@ DOCKER_IMAGE=$1
 [ -z "$DOCKER_IMAGE" ] && usage_exit
 shift
 
+EXTRA_OPTS=
+
+# find the real agent container
+DOCKER_AGENT_CONTAINER=
+for contid in $(docker ps -q); do
+    if [ ! -z "$(docker inspect $contid | grep '/var/lib/go-agent')" ]; then
+        DOCKER_AGENT_CONTAINER=$contid
+        break
+    fi
+done
+if [ -z "$DOCKER_AGENT_CONTAINER" ]; then
+    echo "WARN: Could not find go-agent container, running locally!" >&2
+    EXTRA_OPTS="-e HOME=$HOME -v $HOME:$HOME -v $(pwd):/work -w /work"
+else
+    EXTRA_OPTS="-e HOME=$HOME --volumes-from $DOCKER_AGENT_CONTAINER -w $(pwd)"
+fi
+
 # default Docker options to provide necessary directories
-DOCKER_OPTS="-it --rm -e USER_ID=$(id -u) -e HOME=$HOME -v $HOME:$HOME -v /tools:/tools -v $(pwd):/work"
+# https://docs.docker.com/engine/userguide/dockervolumes/#creating-and-mounting-a-data-volume-container
+DOCKER_OPTS="--rm -e USER_ID=$(id -u) $EXTRA_OPTS -v /meta:/meta -e CREDENTIALS_DIR=$CREDENTIALS_DIR"
 
 PRINT_ONLY=false
 
@@ -19,7 +37,7 @@ PRINT_ONLY=false
 while [ "$1" != "--" ]; do
 	[ -z "$1" ] && usage_exit
 
-	if [ "$1" == "--print-docker-command" ]; then
+	if [ "$1" = "--print-docker-command" ]; then
 		PRINT_ONLY=true
 		shift
 		continue
