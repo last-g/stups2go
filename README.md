@@ -137,7 +137,7 @@ following parameters:
   * The Go server is accessible only via SSL for security reasons. The
     definition will bootstrap an elastic load balancer using the SSL
     certificate specified here. The SSL certificate has to cover the above
-    generated delivery domain. To find out your SSL certificate's IDs,
+    generated delivery domain. To find out your SSL certificate's IDs (ARNs),
     execute the following command: `aws iam list-server-certificates`.
 * AvailabilityZone
   * An EBS volume is always tied to an availability zone. This means, the
@@ -228,7 +228,7 @@ working.
 
 ### Go Agents
 
-Deploying Go agents is a little bit more elaborate, since they can differ between usecases 
+Deploying Go agents is a little bit more elaborate, since they can differ between usecases
 and your environments.
 
 #### Customize your Go agent
