@@ -1,6 +1,6 @@
 FROM zalando/python:3.5.0-4
 
-RUN apt-get update && apt-get install -y build-essential libxml2-dev libxslt-dev zlib1g-dev
+RUN apt-get update && apt-get install -y git build-essential libxml2-dev libxslt-dev zlib1g-dev
 
 # install Python "wheel" to upload "binary" wheel packages to PyPI
 # (python3 setup.py bdist_wheel)
