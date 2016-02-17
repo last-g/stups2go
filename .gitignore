@@ -1,5 +1,6 @@
 # downloaded *.deb files
 *.deb
+server/*.jar
 
 # vi
 *.swp

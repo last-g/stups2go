@@ -19,8 +19,8 @@ VOLUME /data
 # runtime files
 COPY log4j.properties /log4j.properties
 
-# add STUPS extensions
-COPY authentication-plugin/target/go-stups-authentication-plugin.jar /
+# add extensions
+COPY *.jar /
 
 # some tools
 COPY extract-files.sh /extract-files.sh

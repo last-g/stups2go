@@ -2,10 +2,10 @@
 
 # Format:  url>md5>sha1>target
 FILES="
-https://download.go.cd/gocd-deb/go-server-15.2.0-2248.deb>84f07ddce1bc6bf095df17b2050b5fbb>63847ce16d559e9cb4d2204ead64b9bccc72fe6e>server
-https://download.go.cd/gocd-deb/go-agent-15.2.0-2248.deb>2cab9a114a26543139843bb10f52a72b>2a970a5f7e83dd89813c48b261fa6ca11c2d4dcf>agent
+https://download.go.cd/binaries/16.2.1-3027/deb/go-server-16.2.1-3027.deb>c80edfccbd42a37ffbe554fcac4c21c9>dd3381a0e73c4aba34e328674e97ace50958c208>server
+https://download.go.cd/binaries/16.2.1-3027/deb/go-agent-16.2.1-3027.deb>1e9c21f12e1fd41f36e157f86b113e29>d72f8e314499e69dfd56741a866f08cfa695def2>agent
+https://github.com/gocd-contrib/gocd-oauth-login/releases/download/v1.2/github-oauth-login-1.2.jar>31ad9ad1fe08452f73c56a44b035ee91>1bea6bb7da660544c1a4686e7ecf5d7c556e5fcd>server
 "
-
 for f in $FILES; do
 	url=$(echo $f | cut -d'>' -f1)
 	md5=$(echo $f | cut -d'>' -f2)
