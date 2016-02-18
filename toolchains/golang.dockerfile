@@ -9,7 +9,9 @@ RUN curl https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz -o /tmp/
     rm /tmp/go1.6.linux-amd64.tar.gz
 
 
+# keep our environment even after doing "su"
 ENV PATH /usr/local/go/bin:$PATH
+RUN echo "ENV_PATH PATH=$PATH" >> /etc/login.defs
 
 COPY switch-user.sh /switch-user.sh
 ENTRYPOINT ["/switch-user.sh"]
