@@ -29,7 +29,7 @@ docker run -d --name $DB_HOST -e POSTGRES_PASSWORD=$DB_PASSWORD postgres:$DB_VER
 # wait until db was bootstrapped
 COUNTER=0
 while [ true ]; do
-    docker run --rm --link $DB_HOST -e PGPASSWORD=$DB_PASSWORD postgres:$DB_VERSION -- psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
+    docker run --rm --link $DB_HOST -e PGPASSWORD=$DB_PASSWORD --entrypoint psql postgres:$DB_VERSION -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE \"${DB_NAME}\";"
     [ $? -eq 0 ] && break
 
     if [ $COUNTER -gt 60 ]; then
