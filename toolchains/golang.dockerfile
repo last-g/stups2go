@@ -1,4 +1,4 @@
-FROM registry.opensource.zalan.do/stups/ubuntu:15.10-14
+FROM registry.opensource.zalan.do/stups/ubuntu:15.10-24
 
 RUN apt-get update && apt-get install -y git make
 

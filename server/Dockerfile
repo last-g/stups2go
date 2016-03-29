@@ -1,6 +1,6 @@
 # registry.opensource.zalan.do/stups/go-server
 
-FROM registry.opensource.zalan.do/stups/openjdk:8u66-b17-1-16
+FROM registry.opensource.zalan.do/stups/openjdk:8u66-b17-1-17
 MAINTAINER Zalando SE
 
 # keep image updated

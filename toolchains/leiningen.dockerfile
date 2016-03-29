@@ -1,4 +1,4 @@
-FROM zalando/openjdk:8u66-b17-1-3
+FROM registry.opensource.zalan.do/stups/openjdk:8u66-b17-1-17
 
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
         && chmod +x /usr/local/bin/lein

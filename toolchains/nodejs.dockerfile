@@ -1,4 +1,4 @@
-FROM zalando/python:3.5.0-4
+FROM registry.opensource.zalan.do/stups/python:3.5.0-12
 
 # newer nodejs
 RUN curl -sL https://deb.nodesource.com/setup_5.x | bash -
