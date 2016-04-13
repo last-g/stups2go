@@ -5,7 +5,7 @@ import tokens
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: prepare-docker <pierone url>")
+    print("Usage: login-pierone <pierone url>")
     sys.exit(1)
 
 pierone_url = sys.argv[1]
