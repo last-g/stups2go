@@ -7,7 +7,5 @@ RUN curl -L https://github.com/jwilder/docker-squash/releases/download/v0.2.0/do
     && tar -C /usr/local/bin -xzvf /tmp/docker-squash.tar.gz \
     && rm /tmp/docker-squash.tar.gz
 
-COPY login-pierone.py /usr/bin/login-pierone
-
 COPY switch-user.sh /switch-user.sh
 ENTRYPOINT ["/switch-user.sh"]

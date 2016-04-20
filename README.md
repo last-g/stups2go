@@ -357,7 +357,7 @@ To centralize several common tasks, we created some toolchains to predefine some
   * `/tools/run registry.opensource.zalan.do/stups/toolchain-stups:<version> -- scm-source -f <target_scm_source_json_file>`
     * use this to create your scm-source.json, which is needed to identify the code base the docker image will use.
 * pierone login
-  * `/tools/run registry.opensource.zalan.do/stups/toolchain-stups:<version> -e OAUTH2_ACCESS_TOKEN_URL=https://example.org/oauth2/access_token -- login-pierone <pierone url>`
+  * `/tools/run registry.opensource.zalan.do/stups/toolchain-stups:<version> -e OAUTH2_ACCESS_TOKEN_URL=https://example.org/oauth2/access_token -- pierone login --url <pierone url>`
     * Use this command in your pipeline before you pull or push images from your
     PierOne registry. This will generate a Docker configuration with
     appropriate authentication.
