@@ -83,7 +83,7 @@ Resources:
             - "    erase_on_boot: false"
             - "{{#Arguments.ScalyrKey}}scalyr_account_key: '{{Arguments.ScalyrKey}}'{{/Arguments.ScalyrKey}}"
             - "{{#Arguments.LogentriesKey}}logentries_account_key: '{{Arguments.LogentriesKey}}'{{/Arguments.LogentriesKey}}"
-            - "{{#Arguments.AppdynamicsApplication}}appdynamics_application: '{{Arguments.AppdynamicsAplication}}'{{/Arguments.AppdynamicsApplication}}"
+            - "{{#Arguments.AppdynamicsApplication}}appdynamics_application: '{{Arguments.AppdynamicsApplication}}'{{/Arguments.AppdynamicsApplication}}"
             - "environment:"
             - "  STUPS_ACCESS_TOKEN_URL: '{{Arguments.AccessTokenUrl}}'"
             - "  STUPS_TEAM_SERVICE_URL: '{{Arguments.TeamServiceUrl}}'"
