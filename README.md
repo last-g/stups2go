@@ -3,7 +3,7 @@
 [Go Continuous Delivery](http://www.go.cd/) service based on the
 [STUPS infrastructure](https://stups.io).
 
-WORK IN PROGRESS; ABSOLUTELY NOT FINISHED
+**WORK IN PROGRESS; ABSOLUTELY NOT FINISHED**
 
 ## Target Audience
 
@@ -206,11 +206,26 @@ working.
 #### First steps
 
 * [Add a new user](http://www.go.cd/documentation/user/current/configuration/managing_users.html)
-  to the system, matching your username. This new user should be enabled and
-  have administrative permissions by default.
-  * Due to a current bug in the Go server, you have to enable the
-    authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png)
-    to `/dev/null`.
+  to the system, matching your username by using the REST API. This new user must be enabled and an admin:
+```
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/vnd.go.cd.v1+json" \
+  -d '{"login_name":"<name>"}' \
+  "https://myteam.example.org/go/api/users"
+```
+* Register new [OAuth application](https://github.com/settings/applications/new) on Github.com
+  * Authorization callback URL: https://myteam.example.org/go/plugin/interact/github.oauth.login/authenticate
+* Generate [Personal Access Token](https://github.com/settings/tokens) on Github.com
+  * Assign the `` scope
+  * Go needs this for the user search
+* Github OAuth Plugin in Go
+  * Server Base URL
+  * OAuth Client ID and secret (OAuth application)
+  * OAuth Token (Personal Access Token)
+  * Username Regular Expression (optional, Github organization name)
+* Due to a current bug in the Go server, you have to enable the
+  authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png) to `/dev/null`.
 * [Setup auto registration](http://www.go.cd/documentation/user/current/advanced_usage/agent_auto_register.html)
   in your Go server for Go agents and save your key. Note to generate a good
   random key!
