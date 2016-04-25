@@ -116,8 +116,8 @@ provision your actual Go server and your Go agents.
 
 In order to integrate properly with your OAuth2 environment, you need to
 register this deployment as an application in Kio. Go to YourTurn, register
-the app, setup your mint bucket and assign your app the `application.read`
-and `application.write` permission.
+the app, setup your mint buckets (**both** of your production and testing account)
+and assign your app the `application.read` and `application.write` permission.
 
 In order to deploy a Go server, you can use the predefined
 [Senza template](server/senza-go-server.yaml). It takes the
@@ -293,34 +293,6 @@ should do the main work like compiling, testing and packaging your artifacts.
 They can also do big integration tests with the resources of the test account
 without accidentally affecting your production systems. Make sure you switched
 your account to your test account with `mai login ...`.
-
-At first, you need to open your mint bucket to your test account, in order to
-be able to upload Docker images later on. Read about cross-account access
-[on this page](http://docs.aws.amazon.com/AmazonS3/latest/dev/example-walkthroughs-managing-access-example2.html).
-The policy to attach to your bucket should look look similar to that:
-
-```json
-{
-   "Version": "2012-10-17",
-   "Statement": [
-      {
-         "Sid": "GoAgentCredentialsAccess",
-         "Effect": "Allow",
-         "Principal": {
-            "AWS": "arn:aws:iam::<your-test-account-id>:root"
-         },
-         "Action": [
-            "s3:GetObject",
-            "s3:ListBucket"
-         ],
-         "Resource": [
-            "arn:aws:s3:::<your-mint-bucket-name>",
-            "arn:aws:s3:::<your-mint-bucket-name>/<your-application-id>/*"
-         ]
-      }
-   ]
-}
-```
 
 #### Deployer agents
 
