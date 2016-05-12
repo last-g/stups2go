@@ -1,13 +1,7 @@
-FROM registry.opensource.zalan.do/stups/python:3.5.0-12
-
-# newer nodejs
-RUN curl -sL https://deb.nodesource.com/setup_5.x | bash -
+FROM registry.opensource.zalan.do/stups/node:6.1-28
 
 # general tools
-RUN apt-get install -y nodejs build-essential git
-
-# upgrade npm to a sane version
-RUN npm i -g npm
+RUN apt-get install -y git
 
 COPY switch-user.sh /switch-user.sh
 ENTRYPOINT ["/switch-user.sh"]
