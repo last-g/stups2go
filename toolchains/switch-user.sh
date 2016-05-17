@@ -11,5 +11,4 @@ if [ -z "$USER_ID" ]; then
 	exit $?
 fi
 
-useradd -u $USER_ID -d $HOME -M -s /bin/bash worker
 su worker --preserve-environment -c "$COMMAND"
