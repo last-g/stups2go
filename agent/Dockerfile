@@ -1,6 +1,6 @@
 # registry.opensource.zalan.do/stups/go-agent
 
-FROM registry.opensource.zalan.do/stups/openjdk:8u66-b17-1-17
+FROM registry.opensource.zalan.do/stups/openjdk:8u91-b14-1-22
 MAINTAINER Zalando SE
 
 # shareable volumes for sub containers
@@ -9,6 +9,9 @@ VOLUME /var/go
 
 # keep image updated
 RUN apt-get update && apt-get upgrade -y
+
+# create a 'worker' user for, and avoid automatic user creation by go
+RUN useradd -u 909 -d $HOME -M -s /bin/bash worker
 
 # install Go debian package
 COPY *.deb /
