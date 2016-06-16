@@ -239,8 +239,7 @@ Dockerfile could be build like that for a typical Java environment:
 
 ```
 FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
-RUN apt-get update
-RUN apt-get install -y maven npm
+RUN apt-get update && apt-get install -y maven npm
 CMD /run.sh
 ```
 
@@ -260,9 +259,8 @@ And obviously you can combine whatever you need at your builds like that:
 ```
 FROM registry.opensource.zalan.do/stups/go-agent:<agent version>
 
-RUN apt-get update
 # install whatever you need like Apache Maven or NPM with NodeJS
-RUN apt-get install -y maven npm
+RUN apt-get update && apt-get install -y maven npm
 
 # and in addition also Leiningen for compiling Clojure
 RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein \
