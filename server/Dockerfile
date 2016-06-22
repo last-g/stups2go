@@ -25,6 +25,9 @@ COPY *.jar /
 # some tools
 COPY extract-files.sh /extract-files.sh
 
+# adding scm-source.json
+COPY scm-source.json /scm-source.json
+
 # run our bootstrap script
 COPY run.sh /run.sh
 CMD /run.sh

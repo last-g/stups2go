@@ -29,6 +29,9 @@ RUN echo "DAEMON=N" >> /etc/default/go-agent
 COPY tools /tools
 COPY extract-files.sh /extract-files.sh
 
+# adding scm-source.json
+COPY scm-source.json /scm-source.json
+
 # our own script with runtime preparations
 COPY run.sh /run.sh
 CMD /run.sh
