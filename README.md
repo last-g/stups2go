@@ -3,7 +3,7 @@
 [Go Continuous Delivery](http://www.go.cd/) service based on the
 [STUPS infrastructure](https://stups.io).
 
-WORK IN PROGRESS; ABSOLUTELY NOT FINISHED
+**WORK IN PROGRESS; ABSOLUTELY NOT FINISHED**
 
 ## Target Audience
 
@@ -116,8 +116,8 @@ provision your actual Go server and your Go agents.
 
 In order to integrate properly with your OAuth2 environment, you need to
 register this deployment as an application in Kio. Go to YourTurn, register
-the app, setup your mint bucket and assign your app the `application.read`
-and `application.write` permission.
+the app, setup your mint buckets (**both** of your production and testing account)
+and assign your app the `application.read` and `application.write` permission.
 
 In order to deploy a Go server, you can use the predefined
 [Senza template](server/senza-go-server.yaml). It takes the
@@ -206,11 +206,26 @@ working.
 #### First steps
 
 * [Add a new user](http://www.go.cd/documentation/user/current/configuration/managing_users.html)
-  to the system, matching your username. This new user should be enabled and
-  have administrative permissions by default.
-  * Due to a current bug in the Go server, you have to enable the
-    authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png)
-    to `/dev/null`.
+  to the system, matching your username by using the REST API. This new user must be enabled and an admin:
+```
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/vnd.go.cd.v1+json" \
+  -d '{"login_name":"<name>"}' \
+  "https://myteam.example.org/go/api/users"
+```
+* Register new [OAuth application](https://github.com/settings/applications/new) on Github.com
+  * Authorization callback URL: https://myteam.example.org/go/plugin/interact/github.oauth.login/authenticate
+* Generate [Personal Access Token](https://github.com/settings/tokens) on Github.com
+  * Assign the `` scope
+  * Go needs this for the user search
+* Github OAuth Plugin in Go
+  * Server Base URL
+  * OAuth Client ID and secret (OAuth application)
+  * OAuth Token (Personal Access Token)
+  * Username Regular Expression (optional, Github organization name)
+* Due to a current bug in the Go server, you have to enable the
+  authentication system by [setting the path to your password file](http://www.go.cd/documentation/user/current/resources/images/user_authentication_password_file.png) to `/dev/null`.
 * [Setup auto registration](http://www.go.cd/documentation/user/current/advanced_usage/agent_auto_register.html)
   in your Go server for Go agents and save your key. Note to generate a good
   random key!
@@ -278,34 +293,6 @@ should do the main work like compiling, testing and packaging your artifacts.
 They can also do big integration tests with the resources of the test account
 without accidentally affecting your production systems. Make sure you switched
 your account to your test account with `mai login ...`.
-
-At first, you need to open your mint bucket to your test account, in order to
-be able to upload Docker images later on. Read about cross-account access
-[on this page](http://docs.aws.amazon.com/AmazonS3/latest/dev/example-walkthroughs-managing-access-example2.html).
-The policy to attach to your bucket should look look similar to that:
-
-```json
-{
-   "Version": "2012-10-17",
-   "Statement": [
-      {
-         "Sid": "GoAgentCredentialsAccess",
-         "Effect": "Allow",
-         "Principal": {
-            "AWS": "arn:aws:iam::<your-test-account-id>:root"
-         },
-         "Action": [
-            "s3:GetObject",
-            "s3:ListBucket"
-         ],
-         "Resource": [
-            "arn:aws:s3:::<your-mint-bucket-name>",
-            "arn:aws:s3:::<your-mint-bucket-name>/<your-application-id>/*"
-         ]
-      }
-   ]
-}
-```
 
 #### Deployer agents
 
