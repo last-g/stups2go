@@ -1,0 +1,16 @@
+# for github.com
+approvals:
+  groups:
+    zalando:
+      minimum: 2
+      from:
+        orgs:
+          - "zalando"
+
+  # Allow last committer / PR creator to approve as well.
+  # This will probably become the default in zappr.
+  ignore: none
+  
+X-Zalando-Team: "stups"
+# type should be one of [code, doc, config, tools, secrets]
+X-Zalando-Type: code
