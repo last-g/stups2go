@@ -1,4 +1,4 @@
-FROM registry.opensource.zalan.do/stups/node:6.1-28
+FROM registry.opensource.zalan.do/stups/node:6.1-30
 
 # general tools
 RUN apt-get install -y git

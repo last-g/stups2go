@@ -1,4 +1,4 @@
-FROM registry.opensource.zalan.do/stups/python:3.5.0-12
+FROM registry.opensource.zalan.do/stups/python:3.5.1-23
 
 RUN apt-get update && apt-get install -y git build-essential libxml2-dev libxslt-dev zlib1g-dev
 
