@@ -1,8 +1,8 @@
 TOOLCHAINS="
-leiningen:3
-maven:3-4
-nodejs:5-2
-python:3.5-6
-stups:18
-golang:8
+leiningen:5
+maven:3-5
+nodejs:6.1-1
+python:3.5-1
+stups:19
+golang:9
 "
