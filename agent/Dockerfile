@@ -1,6 +1,6 @@
 # registry.opensource.zalan.do/stups/go-agent
 
-FROM registry.opensource.zalan.do/stups/openjdk:8u91-b14-1-22
+FROM registry.opensource.zalan.do/stups/openjdk:8-28
 MAINTAINER Zalando SE
 
 # shareable volumes for sub containers
