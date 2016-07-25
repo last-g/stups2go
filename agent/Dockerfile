@@ -10,8 +10,8 @@ VOLUME /var/go
 # keep image updated
 RUN apt-get update && apt-get upgrade -y
 
-# create a 'worker' user for, and avoid automatic user creation by go
-RUN useradd -u 909 -d $HOME -M -s /bin/bash worker
+# create a 'go' user for, and avoid automatic user creation by go
+RUN useradd -u 909 -d $HOME -M -s /bin/bash go
 
 # install Go debian package
 COPY *.deb /
